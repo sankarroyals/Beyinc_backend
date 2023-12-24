@@ -16,6 +16,34 @@ module.exports={
             })
         })
     },
+    signEmailOTpToken: (payload) =>{
+        return new Promise((resolve, reject)=>{
+            // const payload={};
+            const secretKey = process.env.ACCESS_TOKEN_SECRET;
+            const options= {
+                expiresIn: '60s',
+            }
+            JWT.sign(payload, secretKey, options, (err, token)=>{
+                if(err){
+                    return reject(err)
+                }
+                return resolve(token)
+            })
+        })
+    },
+
+    verifyEmailOtpToken: (token)=>{
+        return new Promise((resolve, reject)=>{
+            JWT.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, payload)=>{
+                if(err){
+                   return reject(err)
+                }
+                const otp = payload.otp;
+                const email = payload.email;
+                resolve({otp: otp, email: email})
+            })
+        })
+    },
 
     signRefreshToken: (payload, userId) =>{
         return new Promise((resolve, reject)=>{
