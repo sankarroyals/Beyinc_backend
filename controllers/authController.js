@@ -31,21 +31,22 @@ exports.register = async (req, res, next) => {
     const userDoesExist = await User.findOne({ email: email });
     const userNameDoesExist = await User.findOne({ userName: userName });
     const phoneExist = await User.findOne({ phone: phone });
-    const ErrorMessages = [];
+    const ErrorMessages = '';
     if (userDoesExist) {
-      ErrorMessages.push("Email Already Exist");
+      ErrorMessages.push("Email");
       // return res.status(404).json({message: 'Email Already Exist'})
     }
     if (userNameDoesExist) {
-      ErrorMessages.push("User Name Already Exist");
+      ErrorMessages.push(",User Name ");
       // return res.status(404).json({message: 'User Name Already Exist'})
     }
     if (phoneExist) {
-      ErrorMessages.push("Phone Number Already Exist");
+      ErrorMessages.push(",Phone Number ");
       // return res.status(404).json({message: 'Phone Number Already Exist'})
     }
-    if (ErrorMessages.length > 0) {
-      return res.status(404).json({ message: ErrorMessages });
+
+    if (ErrorMessages.split(',').length > 0) {
+      return res.status(404).json({ message: ErrorMessages+'Already exists' });
     }
     await User.create({
       email,
