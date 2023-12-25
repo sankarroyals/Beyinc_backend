@@ -31,22 +31,22 @@ exports.register = async (req, res, next) => {
     const userDoesExist = await User.findOne({ email: email });
     const userNameDoesExist = await User.findOne({ userName: userName });
     const phoneExist = await User.findOne({ phone: phone });
-    let ErrorMessages = '';
+    const ErrorMessages = [];
     if (userDoesExist) {
-      ErrorMessages+="Email";
+      ErrorMessages.push("Email");
       // return res.status(404).json({message: 'Email Already Exist'})
     }
     if (userNameDoesExist) {
-      ErrorMessages+=", User Name ";
+      ErrorMessages.push("User Name ");
       // return res.status(404).json({message: 'User Name Already Exist'})
     }
     if (phoneExist) {
-      ErrorMessages+=", Phone Number ";
+      ErrorMessages.push("Phone Number ");
       // return res.status(404).json({message: 'Phone Number Already Exist'})
     }
 
-    if (ErrorMessages.split(',').length > 0) {
-      return res.status(404).json({ message: ErrorMessages+'Already exists' });
+    if (ErrorMessages.length > 0) {
+      return res.status(404).json({ message: ErrorMessages.join(',')+'Already exists' });
     }
     await User.create({
       email,
@@ -114,7 +114,7 @@ exports.login = async (req, res, next) => {
 exports.mobile_login = async (req, res, next) => {
   try {
     const { phone, password } = req.body;
-    const validating_email_password = await authSchema.validateAsync(req.body);
+    // const validating_email_password = await authSchema.validateAsync(req.body);
 
     // Checking user already exist or not
     const phoneExist = await User.findOne({ phone: phone });
@@ -123,16 +123,16 @@ exports.mobile_login = async (req, res, next) => {
     }
 
     // comparing password
-    if (
-      !(await bcrypt.compare(
-        validating_email_password.password,
-        phoneExist.password
-      ))
-    ) {
-      return res
-        .status(404)
-        .json({ message: "Phone Number/password is wrong" });
-    } else {
+    // if (
+    //   !(await bcrypt.compare(
+    //     validating_email_password.password,
+    //     phoneExist.password
+    //   ))
+    // ) {
+    //   return res
+    //     .status(404)
+    //     .json({ message: "Phone Number/password is wrong" });
+    // } else {
       const accessToken = await signAccessToken(
         { email: phoneExist.email, user_id: phoneExist._id },
         `${phoneExist._id}`
@@ -143,7 +143,7 @@ exports.mobile_login = async (req, res, next) => {
       );
 
       return res.send({ accessToken: accessToken, refreshToken: refreshToken });
-    }
+    // }
   } catch (err) {
     if (err.isJoi == true) err.status = 422;
     next(err);
