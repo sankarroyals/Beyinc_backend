@@ -33,15 +33,15 @@ exports.register = async (req, res, next) => {
     const phoneExist = await User.findOne({ phone: phone });
     const ErrorMessages = '';
     if (userDoesExist) {
-      ErrorMessages.push("Email");
+      ErrorMessages+="Email";
       // return res.status(404).json({message: 'Email Already Exist'})
     }
     if (userNameDoesExist) {
-      ErrorMessages.push(", User Name ");
+      ErrorMessages+=", User Name ";
       // return res.status(404).json({message: 'User Name Already Exist'})
     }
     if (phoneExist) {
-      ErrorMessages.push(", Phone Number ");
+      ErrorMessages+=", Phone Number ";
       // return res.status(404).json({message: 'Phone Number Already Exist'})
     }
 
