@@ -3,6 +3,8 @@ const authController = require("../controllers/authController");
 const router = express.Router();
 
 router.route("/register").post(authController.register);
+router.route("/editProfile").post(authController.editProfile);
+
 router.route("/login").post(authController.login);
 router.route("/mobile/login").post(authController.mobile_login);
 router.route("/refresh-token").post(authController.refreshToken);
