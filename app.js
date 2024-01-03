@@ -1,5 +1,6 @@
 const express = require("express");
 const authRouter = require('./routes/authRouter')
+const userRouter = require('./routes/userRouter')
 const {verifyAccessToken} = require('./helpers/jwt_helpers')
 
 const cors = require("cors");
@@ -15,6 +16,7 @@ app.use(express.urlencoded({extended:true, limit: '25mb'}))
 
 // ROUTES
 app.use("/api/auth",  authRouter);
+app.use("/api/userDetails", userRouter);
 
 
 module.exports = app;
