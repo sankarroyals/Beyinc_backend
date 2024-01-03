@@ -139,7 +139,7 @@ exports.login = async (req, res, next) => {
       return res.status(404).json({ message: "Email/password is wrong" });
     } else {
       const accessToken = await signAccessToken(
-        { email: userDoesExist.email, user_id: userDoesExist._id },
+        { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName },
         `${userDoesExist._id}`
       );
       const refreshToken = await signRefreshToken(
