@@ -16,7 +16,9 @@ app.use(express.urlencoded({extended:true, limit: '25mb'}))
 
 // ROUTES
 app.use("/api/auth",  authRouter);
-app.use("/api/userDetails", userRouter);
+app.use("/api/userDetails",
+    // verifyAccessToken,
+    userRouter);
 
 
 module.exports = app;
