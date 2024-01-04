@@ -67,7 +67,7 @@ exports.updateVerification = async (req, res, next) => {
     }
 }
 
-exports.verifyUser = async (req, res, next) => {
+exports.verifyUserPassword = async (req, res, next) => {
     try {
         const { email, password } = req.body;
         // validating email and password
