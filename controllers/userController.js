@@ -144,6 +144,44 @@ exports.updateProfileImage = async (req, res, next) => {
     }
 }
 
+exports.deleteProfileImage = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const userDoesExist = await User.findOne({ email: email });
+        if (!userDoesExist) {
+            return res.status(400).send('User not found')
+        }
+        if (userDoesExist.image.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist.image.public_id, (error, result) => {
+                if (error) {
+                    console.error('Error deleting image:', error);
+                } else {
+                    console.log('Image deleted successfully:', result);
+                }
+            });
+        }
+        await User.updateOne({ email: email }, {
+            $set: {
+                image: undefined
+            }
+        })
+        const accessToken = await signAccessToken(
+            { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName },
+            `${userDoesExist._id}`
+        );
+        const refreshToken = await signRefreshToken(
+            { email: userDoesExist.email, _id: userDoesExist._id },
+            `${userDoesExist._id}`
+        );
+
+        return res.send({ accessToken: accessToken, refreshToken: refreshToken });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(400).json('Error while updating profile')
+    }
+}
+
 
 
 
