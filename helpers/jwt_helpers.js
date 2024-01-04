@@ -5,7 +5,7 @@ module.exports={
             // const payload={};
             const secretKey = process.env.ACCESS_TOKEN_SECRET;
             const options= {
-                expiresIn: '1d',
+                expiresIn: '30s',
                 audience: userId,
             }
             JWT.sign(payload, secretKey, options, (err, token)=>{
@@ -73,10 +73,23 @@ module.exports={
         // console.log(JWT.sign(token, process.env.ACCESS_TOKEN_SECRET))
         JWT.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, payload)=>{
             if(err){
-                return res.status(401).json({ message: err.message})
+                return res.status(401).json({ message: 'Your session expired please login again'})
             }
             req.payload = payload
             next()
+        })
+    },
+
+    verifyAPiAccessToken: (token) => {
+        return new Promise((resolve, reject) => {
+            JWT.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, payload) => {
+                if (err) {
+                    return reject(err.message)
+                }
+                const userId = payload.aud;
+                const email = payload.email;
+                resolve({ user_id: userId, email: email })
+            })
         })
     },
 
@@ -84,7 +97,7 @@ module.exports={
         return new Promise((resolve, reject)=>{
             JWT.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload)=>{
                 if(err){
-                    return res.status(401).json({ message: err.message})
+                    return reject(err.message)
                 }
                 const userId = payload.aud;
                 const email = payload.email;

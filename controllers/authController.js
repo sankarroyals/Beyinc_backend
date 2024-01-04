@@ -7,6 +7,8 @@ const {
   verifyRefreshToken,
   signEmailOTpToken,
   verifyEmailOtpToken,
+  verifyAccessToken,
+  verifyAPiAccessToken,
 } = require("../helpers/jwt_helpers");
 const User = require("../models/UserModel");
 const dotenv = require("dotenv");
@@ -169,10 +171,25 @@ exports.refreshToken = async (req, res, next) => {
 
     return res.send({ accessToken: accessToken, refreshToken: refreshtoken });
   } catch (err) {
-    if (err.isJoi == true) err.status = 422;
-    next(err);
+    return res.status(400).json(err);
+
   }
 };
+
+exports.verifyMainAccessToken = async (req, res, next) => {
+  try {
+    const { accessToken } = req.body;
+    if (!accessToken) {
+      return res.status(400).json({ message: "Bad request" });
+    }
+    const result = await verifyAPiAccessToken(accessToken);
+    return res.send(result);
+  } catch (err) {
+    return res.status(400).json(err);
+
+  }
+};
+
 
 exports.mobile_otp = async (req, res, next) => {
   try {

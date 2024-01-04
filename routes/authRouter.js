@@ -11,6 +11,8 @@ router.route("/sendMobileOtp").post(authController.mobile_otp);
 router.route("/forgotPassword").post(authController.forgot_password);
 router.route("/sendEmailOtp").post(authController.send_otp_mail);
 router.route("/verifyOtp").post(authController.verify_otp);
+router.route("/verifyApiAccessToken").post(authController.verifyMainAccessToken);
+
 
 
 module.exports = router;
