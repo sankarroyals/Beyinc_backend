@@ -98,7 +98,7 @@ exports.login = async (req, res, next) => {
       return res.status(404).json({ message: "Email/password is wrong" });
     } else {
       const accessToken = await signAccessToken(
-        { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName },
+        { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url },
         `${userDoesExist._id}`
       );
       const refreshToken = await signRefreshToken(
@@ -323,3 +323,5 @@ exports.verify_otp = async (req, res, next) => {
     return res.status(404).json({ message: "Entered OTP is wrong" });
   }
 };
+
+
