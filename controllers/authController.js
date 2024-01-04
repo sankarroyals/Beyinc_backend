@@ -74,49 +74,6 @@ exports.register = async (req, res, next) => {
 };
 
 
-
-exports.editProfile = async (req,res,next) => {
-  try {
-    const { email, password, userName, role } = req.body;
-    // validating email and password
-    const validating_email_password = await authSchema.validateAsync(req.body);
-
-    // Checking user already exist or not
-    const userDoesExist = await User.findOne({ email: email });
-    if (!userDoesExist) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // comparing password
-    if (
-      !(await bcrypt.compare(
-        validating_email_password.password,
-        userDoesExist.password
-      ))
-    ) {
-      return res.status(404).json({ message: "Email/password is wrong" });
-    } else {
-
-      await User.updateOne({email: email}, {$set: {userName, role}})
-
-      const accessToken = await signAccessToken(
-        { email: userDoesExist.email, user_id: userDoesExist._id },
-        `${userDoesExist._id}`
-      );
-      const refreshToken = await signRefreshToken(
-        { email: userDoesExist.email, _id: userDoesExist._id },
-        `${userDoesExist._id}`
-      );
-
-      return res.send({ accessToken: accessToken, refreshToken: refreshToken, message: 'Profile Updated Successfully !' });
-    }
-  } catch (err) {
-    if (err.isJoi == true) err.status = 422;
-    next(err);
-  }
-}
-
-
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
