@@ -91,7 +91,7 @@ module.exports={
                 resolve({ user_id: userId, email: email })
             }) 
         })
-    },
+    }, 
 
     verifyRefreshToken: (token)=>{
         return new Promise((resolve, reject)=>{
