@@ -262,7 +262,17 @@ exports.editProfile = async (req, res, next) => {
             }
             })
             await User.updateOne({ email: email }, { $set: { verification: 'pending' } })
-            return res.send({ message: 'Profile Sent for approval!' });
+            const userExist = await User.findOne({email: email})
+            const accessToken = await signAccessToken(
+                { email: userExist.email, coins: userExist.coins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
+                `${userExist._id}`
+            );
+            const refreshToken = await signRefreshToken(
+                { email: userExist.email, _id: userExist._id },
+                `${userExist._id}`
+            );
+
+            return res.send({ accessToken: accessToken, refreshToken: refreshToken });
         }
         await UserUpdate.create({
             email: email, role: role, userName: userName, phone: phone, verification: 'pending', documents: {
@@ -290,7 +300,17 @@ exports.editProfile = async (req, res, next) => {
         })
         await User.updateOne({ email: email }, { $set: {verification: 'pending' } })
 
-        return res.send({ message: 'Profile Sent for approval!' });
+        const userExist = await User.findOne({ email: email })
+        const accessToken = await signAccessToken(
+            { email: userExist.email, coins: userExist.coins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
+            `${userExist._id}`
+        );
+        const refreshToken = await signRefreshToken(
+            { email: userExist.email, _id: userExist._id },
+            `${userExist._id}`
+        );
+
+        return res.send({ accessToken: accessToken, refreshToken: refreshToken });
 
     } catch (err) {
         return res.status(400).send({ message: err });
