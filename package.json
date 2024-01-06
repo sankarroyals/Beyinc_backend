@@ -17,6 +17,8 @@
     "nodemailer": "^6.9.7",
     "nodemon": "^2.0.22",
     "pg": "^8.11.3",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0",
     "textflow.js": "^0.1.4",
     "twilio": "^4.20.0"
   }

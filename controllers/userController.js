@@ -63,7 +63,7 @@ exports.updateVerification = async (req, res, next) => {
         if (status == 'approved') {
             await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
         } else {
-            await User.updateOne({ email: email }, { $set: { verification: status } })  
+            await User.updateOne({ email: email }, { $set: { verification: status } })
         }
         return res.send({ message: `Profile status is ${status} !` });
 
@@ -184,6 +184,24 @@ exports.deleteProfileImage = async (req, res, next) => {
     } catch (err) {
         console.log(err);
         return res.status(400).json('Error while updating profile')
+    }
+}
+
+
+
+exports.getUsers = async (req, res, next) => {
+    try {
+        const { type } = req.body
+        if (type !== '') {
+            let result = await User.find({ role: type })
+            return res.status(200).json(result)
+        } else {
+            let result = await User.find()
+            return res.status(200).json(result)
+        }
+
+    } catch (err) {
+        return res.status(400).json('Error while fetching')
     }
 }
 
