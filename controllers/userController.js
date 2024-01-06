@@ -60,7 +60,9 @@ exports.updateVerification = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
-        await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
+        if (status == 'approved') {
+            await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
+        }
         return res.send({ message: `Profile status is ${status} !` });
 
     } catch (err) {
