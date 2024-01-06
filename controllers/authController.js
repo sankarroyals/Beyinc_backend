@@ -99,7 +99,7 @@ exports.login = async (req, res, next) => {
       return res.status(404).json({ message: "Email/password is wrong" });
     } else {
       const accessToken = await signAccessToken(
-        { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+        { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
         `${userDoesExist._id}`
       );
       const refreshToken = await signRefreshToken(
@@ -186,7 +186,7 @@ exports.verifyMainAccessToken = async (req, res, next) => {
     const { email } = await verifyAPiAccessToken(accessToken);
     const userDoesExist = await User.findOne({email: email})
     const currentaccessToken = await signAccessToken(
-      { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
       `${userDoesExist._id}`
     );
     const refreshToken = await signRefreshToken(

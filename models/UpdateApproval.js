@@ -24,6 +24,55 @@ const userApprovalSchema = new mongoose.Schema({
     },
     verification: {
         type: String
+    },
+    documents: {
+
+        resume: {
+            public_id: {
+                type: String
+            },
+            url: {
+                type: String
+            }
+        },
+
+
+        acheivements: {
+            public_id: {
+                type: String
+            },
+            url: {
+                type: String
+            }
+        },
+
+        degree: {
+            public_id: {
+                type: String
+            },
+            url: {
+                type: String
+            }
+        },
+
+        expertise: {
+            public_id: {
+                type: String
+            },
+            url: {
+                type: String
+            }
+
+        },
+
+        working: {
+            public_id: {
+                type: String
+            },
+            url: {
+                type: String
+            }
+        }
     }
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields

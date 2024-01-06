@@ -32,22 +32,126 @@ exports.getProfile = async (req, res, next) => {
 
 exports.editProfile = async (req, res, next) => {
     try {
-        const { email, userName, role, phone } = req.body;
+        const { email, userName, role, phone, documents } = req.body;
         // validating email and password
-        const validating_email_password = await authSchema.validateAsync(req.body);
 
-        // Checking user already exist or not
         const userDoesExist = await UserUpdate.findOne({ email: email });
+        // Checking user already exist or not
+        if (userDoesExist.documents.resume?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist.documents.resume.public_id, (error, result) => {
+                if (error) {
+                    console.error('Error deleting image:', error);
+                } else {
+                    console.log('Image deleted successfully:', result);
+                }
+            });
+        }
+        if (userDoesExist.documents.expertise?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist.documents.expertise.public_id, (error, result) => {
+                if (error) {
+                    console.error('Error deleting image:', error);
+                } else {
+                    console.log('Image deleted successfully:', result);
+                }
+            });
+        }
+        if (userDoesExist.documents.acheivements?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist.documents.acheivements.public_id, (error, result) => {
+                if (error) {
+                    console.error('Error deleting image:', error);
+                } else {
+                    console.log('Image deleted successfully:', result);
+                }
+            });
+        }
+        if (userDoesExist.documents.degree?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist.documents.degree.public_id, (error, result) => {
+                if (error) {
+                    console.error('Error deleting image:', error);
+                } else {
+                    console.log('Image deleted successfully:', result);
+                }
+            });
+        }
+        if (userDoesExist.documents.working?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist.documents.working.public_id, (error, result) => {
+                if (error) {
+                    console.error('Error deleting image:', error);
+                } else {
+                    console.log('Image deleted successfully:', result);
+                }
+            });
+        }
+
+        const resume = await cloudinary.uploader.upload(documents.resume, {
+            folder: 'documents'
+        })
+        const expertise = await cloudinary.uploader.upload(documents.expertise, {
+            folder: 'documents'
+        })
+        const acheivements = await cloudinary.uploader.upload(documents.acheivements, {
+            folder: 'documents'
+        })
+        const degree = await cloudinary.uploader.upload(documents.degree, {
+            folder: 'documents'
+        })
+        const working = await cloudinary.uploader.upload(documents.working, {
+            folder: 'documents'
+        })
+
+
         if (userDoesExist) {
-            await UserUpdate.updateOne({ email: email }, { $set: { userName, role, phone, verification: 'pending' } })
+            await UserUpdate.updateOne({ email: email }, { $set: { userName, role, phone, verification: 'pending', documents: {
+                resume: {
+                    public_id: resume.public_id,
+                    url: resume.secure_url
+                },
+                expertise: {
+                    public_id: expertise.public_id,
+                    url: expertise.secure_url
+                },
+                acheivements: {
+                    public_id: acheivements.public_id,
+                    url: acheivements.secure_url
+                },
+                degree: {
+                    public_id: degree.public_id,
+                    url: degree.secure_url
+                },
+                working: {
+                    public_id: working.public_id,
+                    url: working.secure_url
+                },
+            }} })
             return res.send({ message: 'Profile Sent for approval!' });
         }
-        await UserUpdate.create({ email: email, role: role, userName: userName, phone: phone, verification: 'pending' })
+        await UserUpdate.create({
+            email: email, role: role, userName: userName, phone: phone, verification: 'pending', documents: {
+                resume: {
+                    public_id: resume.public_id,
+                    url: resume.secure_url
+                },
+                expertise: {
+                    public_id: expertise.public_id,
+                    url: expertise.secure_url
+                },
+                acheivements: {
+                    public_id: acheivements.public_id,
+                    url: acheivements.secure_url
+                },
+                degree: {
+                    public_id: degree.public_id,
+                    url: degree.secure_url
+                },
+                working: {
+                    public_id: working.public_id,
+                    url: working.secure_url
+                },
+            } })
         return res.send({ message: 'Profile Sent for approval!' });
 
     } catch (err) {
-        if (err.isJoi == true) err.status = 422;
-        next(err);
+        return res.send({ message: err });
     }
 }
 
@@ -61,7 +165,7 @@ exports.updateVerification = async (req, res, next) => {
         }
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
         if (status == 'approved') {
-            await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
+            await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
         }
@@ -133,7 +237,7 @@ exports.updateProfileImage = async (req, res, next) => {
             }
         })
         const accessToken = await signAccessToken(
-            { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: result.secure_url, verification: userDoesExist.verification },
+            { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: result.secure_url, verification: userDoesExist.verification },
             `${userDoesExist._id}`
         );
         const refreshToken = await signRefreshToken(
@@ -171,7 +275,7 @@ exports.deleteProfileImage = async (req, res, next) => {
             }
         })
         const accessToken = await signAccessToken(
-            { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, verification: userDoesExist.verification },
+            { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, verification: userDoesExist.verification },
             `${userDoesExist._id}`
         );
         const refreshToken = await signRefreshToken(
