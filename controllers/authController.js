@@ -183,8 +183,17 @@ exports.verifyMainAccessToken = async (req, res, next) => {
     if (!accessToken) {
       return res.status(400).json({ message: "Bad request" });
     }
-    const result = await verifyAPiAccessToken(accessToken);
-    return res.send(result);
+    const { email } = await verifyAPiAccessToken(accessToken);
+    const userDoesExist = await User.findOne({email: email})
+    const currentaccessToken = await signAccessToken(
+      { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      `${userDoesExist._id}`
+    );
+    const refreshToken = await signRefreshToken(
+      { email: userDoesExist.email, _id: userDoesExist._id },
+      `${userDoesExist._id}`
+    );
+    return res.send({ accessToken: currentaccessToken, refreshToken: refreshToken });
   } catch (err) {
     return res.status(400).json(err);
 
