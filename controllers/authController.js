@@ -56,6 +56,7 @@ exports.register = async (req, res, next) => {
       phone,
       role,
       userName,
+      verification: 'initial'
     });
     const userDetails = await User.findOne({ email: email });
 
@@ -98,7 +99,7 @@ exports.login = async (req, res, next) => {
       return res.status(404).json({ message: "Email/password is wrong" });
     } else {
       const accessToken = await signAccessToken(
-        { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url },
+        { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
         `${userDoesExist._id}`
       );
       const refreshToken = await signRefreshToken(

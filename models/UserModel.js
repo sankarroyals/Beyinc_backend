@@ -31,6 +31,9 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String
     },
+    verification: {
+        type: String
+    }
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
 })

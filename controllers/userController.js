@@ -60,11 +60,12 @@ exports.updateVerification = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
+        await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
         return res.send({ message: `Profile status is ${status} !` });
 
     } catch (err) {
-        if (err.isJoi == true) err.status = 422;
-        next(err);
+        return res.status(400).send({ message: `Error in Profile updation !` });
+
     }
 }
 
@@ -90,7 +91,7 @@ exports.verifyUserPassword = async (req, res, next) => {
             return res.status(404).json({ message: "Entered password is wrong" });
         } else {
 
-            return res.send({ message: 'Password verified' });
+            return res.send({ message: 'Password verification' });
         }
     } catch (err) {
         if (err.isJoi == true) err.status = 422;
@@ -128,7 +129,7 @@ exports.updateProfileImage = async (req, res, next) => {
             }
         })
         const accessToken = await signAccessToken(
-            { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: result.secure_url },
+            { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: result.secure_url, verification: userDoesExist.verification },
             `${userDoesExist._id}`
         );
         const refreshToken = await signRefreshToken(
@@ -166,7 +167,7 @@ exports.deleteProfileImage = async (req, res, next) => {
             }
         })
         const accessToken = await signAccessToken(
-            { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName },
+            { email: userDoesExist.email, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, verification: userDoesExist.verification },
             `${userDoesExist._id}`
         );
         const refreshToken = await signRefreshToken(
