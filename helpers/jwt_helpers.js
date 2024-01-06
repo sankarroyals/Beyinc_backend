@@ -92,7 +92,7 @@ module.exports={
             }) 
         })
     },
-
+    // checking
     verifyRefreshToken: (token)=>{
         return new Promise((resolve, reject)=>{
             JWT.verify(token, process.env.REFRESH_TOKEN_SECRET, (err, payload)=>{
