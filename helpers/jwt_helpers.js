@@ -89,7 +89,7 @@ module.exports={
                 const userId = payload.aud;
                 const email = payload.email;
                 resolve({ user_id: userId, email: email })
-            })
+            }) 
         })
     },
 
