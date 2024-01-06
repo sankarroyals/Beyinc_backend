@@ -388,7 +388,7 @@ exports.updateProfileImage = async (req, res, next) => {
             });
         }
         const result = await cloudinary.uploader.upload(image, {
-            folder: 'users'
+            folder: `${email}`
         })
         await User.updateOne({ email: email }, {
             $set: {
