@@ -37,8 +37,8 @@ exports.editProfile = async (req, res, next) => {
 
         const userDoesExist = await UserUpdate.findOne({ email: email });
         // Checking user already exist or not
-        if (userDoesExist.documents.resume?.public_id !== undefined) {
-            await cloudinary.uploader.destroy(userDoesExist.documents.resume.public_id, (error, result) => {
+        if (userDoesExist?.documents.resume?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist?.documents.resume.public_id, (error, result) => {
                 if (error) {
                     console.error('Error deleting image:', error);
                 } else {
@@ -46,8 +46,8 @@ exports.editProfile = async (req, res, next) => {
                 }
             });
         }
-        if (userDoesExist.documents.expertise?.public_id !== undefined) {
-            await cloudinary.uploader.destroy(userDoesExist.documents.expertise.public_id, (error, result) => {
+        if (userDoesExist?.documents.expertise?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist?.documents.expertise.public_id, (error, result) => {
                 if (error) {
                     console.error('Error deleting image:', error);
                 } else {
@@ -55,8 +55,8 @@ exports.editProfile = async (req, res, next) => {
                 }
             });
         }
-        if (userDoesExist.documents.acheivements?.public_id !== undefined) {
-            await cloudinary.uploader.destroy(userDoesExist.documents.acheivements.public_id, (error, result) => {
+        if (userDoesExist?.documents.acheivements?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist?.documents.acheivements.public_id, (error, result) => {
                 if (error) {
                     console.error('Error deleting image:', error);
                 } else {
@@ -64,8 +64,8 @@ exports.editProfile = async (req, res, next) => {
                 }
             });
         }
-        if (userDoesExist.documents.degree?.public_id !== undefined) {
-            await cloudinary.uploader.destroy(userDoesExist.documents.degree.public_id, (error, result) => {
+        if (userDoesExist?.documents.degree?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist?.documents.degree.public_id, (error, result) => {
                 if (error) {
                     console.error('Error deleting image:', error);
                 } else {
@@ -73,8 +73,8 @@ exports.editProfile = async (req, res, next) => {
                 }
             });
         }
-        if (userDoesExist.documents.working?.public_id !== undefined) {
-            await cloudinary.uploader.destroy(userDoesExist.documents.working.public_id, (error, result) => {
+        if (userDoesExist?.documents.working?.public_id !== undefined) {
+            await cloudinary.uploader.destroy(userDoesExist?.documents.working.public_id, (error, result) => {
                 if (error) {
                     console.error('Error deleting image:', error);
                 } else {
@@ -83,21 +83,36 @@ exports.editProfile = async (req, res, next) => {
             });
         }
 
-        const resume = await cloudinary.uploader.upload(documents.resume, {
-            folder: 'documents'
-        })
-        const expertise = await cloudinary.uploader.upload(documents.expertise, {
-            folder: 'documents'
-        })
-        const acheivements = await cloudinary.uploader.upload(documents.acheivements, {
-            folder: 'documents'
-        })
-        const degree = await cloudinary.uploader.upload(documents.degree, {
-            folder: 'documents'
-        })
-        const working = await cloudinary.uploader.upload(documents.working, {
-            folder: 'documents'
-        })
+        let resume = ''
+        if (documents.resume !== '') {
+            resume = await cloudinary.uploader.upload(documents.resume, {
+                folder: 'documents'
+            })
+        }
+        let expertise = ''
+        if (documents.expertise !== '') {
+            expertise = await cloudinary.uploader.upload(documents.expertise, {
+                folder: 'documents'
+            })
+        }
+        let acheivements = ''
+        if (documents.acheivements !== '') {
+            acheivements = await cloudinary.uploader.upload(documents.acheivements, {
+                folder: 'documents'
+            })
+        }
+        let degree = ''
+        if (documents.degree !== '') {
+            degree = await cloudinary.uploader.upload(documents.degree, {
+                folder: 'documents'
+            })
+        }
+        let working = ''
+        if (documents.working !== '') {
+            working = await cloudinary.uploader.upload(documents.working, {
+                folder: 'documents'
+            })
+        }
 
 
         if (userDoesExist) {
@@ -151,7 +166,7 @@ exports.editProfile = async (req, res, next) => {
         return res.send({ message: 'Profile Sent for approval!' });
 
     } catch (err) {
-        return res.send({ message: err });
+        return res.status(400).send({ message: err });
     }
 }
 
