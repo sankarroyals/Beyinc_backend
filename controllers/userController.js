@@ -62,6 +62,8 @@ exports.updateVerification = async (req, res, next) => {
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
         if (status == 'approved') {
             await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
+        } else {
+            await User.updateOne({ email: email }, { $set: { verification: status } })  
         }
         return res.send({ message: `Profile status is ${status} !` });
 
