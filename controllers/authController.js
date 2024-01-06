@@ -161,8 +161,9 @@ exports.refreshToken = async (req, res, next) => {
       return res.status(400).json({ message: "Bad request" });
     }
     const { user_id, email } = await verifyRefreshToken(refreshToken);
+    const userDoesExist = await User.findOne({ email: email });
     const accessToken = await signAccessToken(
-      { email: email, user_id: user_id },
+      { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
       `${user_id}`
     );
     const refreshtoken = await signRefreshToken(
