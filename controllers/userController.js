@@ -21,8 +21,10 @@ exports.getProfile = async (req, res, next) => {
     try {
         const { email } = req.body
         const userDoesExist = await User.findOne({ email: email });
+        const removePass = { ...userDoesExist._doc, password: '' }
+        // console.log(removePass);
         if (userDoesExist) {
-            return res.status(200).json(userDoesExist)
+            return res.status(200).json(removePass)
         }
     }
     catch (error) {
