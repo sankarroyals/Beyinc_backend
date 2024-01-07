@@ -72,8 +72,17 @@ exports.deleteUserConversation = async (req, res, next) => {
 
 exports.addMessage = async (req, res, next) => {
     try {
-            await Message.create(req.body)
-            return res.status(200).send('New Message is added')
+            const { file, email, conversationId, senderId, receiverId, message } = req.body
+            if (file !== '') {
+                const result = await cloudinary.uploader.upload(file, {
+                    folder: `${email}/chat`
+                }) 
+                await Message.create({ email, file: { public_id: result.public_id, secure_url: result.secure_url }, conversationId, senderId, receiverId, message })
+                return res.status(200).send('New Message is added')
+        }
+        await Message.create({ email, file: '', conversationId, senderId, receiverId, message })
+        return res.status(200).send('New Message is added')
+           
     }
     catch (error) {
         return res.status(400).send(error)

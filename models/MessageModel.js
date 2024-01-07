@@ -12,6 +12,16 @@ const MessageSchema = new mongoose.Schema({
     },
     message: {
         type: String
+    },
+    file: {
+        
+        public_id: {
+                type: String
+        },
+        secure_url: {
+            type: String
+        }
+        
     }
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
