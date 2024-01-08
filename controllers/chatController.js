@@ -26,7 +26,7 @@ exports.addConversation = async (req, res, next) => {
         })
         if (conversationExists.length == 0) {
             await Conversation.create({
-                members: [req.body.senderId, req.body.receiverId]
+                members: [req.body.senderId, req.body.receiverId], requestedTo: req.body.receiverId, status: 'pending'
             })
             return res.status(200).send('New Conversation is added')
         }
@@ -38,6 +38,39 @@ exports.addConversation = async (req, res, next) => {
     }
 }
 
+
+exports.updateMessageRequest = async (req, res, next) => {
+    try {
+        const conversationExists = await Conversation.findOne({
+            _id: req.body.conversationId
+        })
+        if (conversationExists) {
+            await Conversation.updateOne({ status: req.body.status })
+            if (req.body.status == 'rejected') {
+                await Conversation.deleteOne({ _id: req.body.conversationId })  
+            }
+            return res.status(200).send(`Message ${req.body.status}`)
+        }
+        return res.status(400).send('Conversation not found')
+
+    }
+    catch (error) {
+        return res.status(400).send(error)
+    }
+}
+
+exports.fetchRequest = async (req, res, next) => {
+    try {
+        const conversationExists = await Conversation.find({
+            requestedTo: req.body.email, status: 'pending'
+        })
+        return res.status(200).send(conversationExists)
+
+    }
+    catch (error) {
+        return res.status(400).send(error)
+    }
+}
 
 exports.findUserConversation = async (req, res, next) => {
     try {

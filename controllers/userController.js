@@ -439,7 +439,7 @@ exports.deleteProfileImage = async (req, res, next) => {
             }
         })
         const accessToken = await signAccessToken(
-            { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, verification: userDoesExist.verification },
+            { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, verification: userDoesExist.verification, image: undefined },
             `${userDoesExist._id}`
         );
         const refreshToken = await signRefreshToken(
