@@ -78,7 +78,7 @@ exports.editProfile = async (req, res, next) => {
         // }
 
         let resume = ''
-        if (documents.resume !== '') {
+        if (documents.resume !== '' && Object.keys(documents.resume).length !== 0) {
             if (documents.resume?.public_id == undefined) {
                 if (userDoesExist?.documents.resume.public_id !== undefined) {
                     await cloudinary.uploader.destroy(userDoesExist?.documents.resume.public_id, (error, result) => {
@@ -109,7 +109,7 @@ exports.editProfile = async (req, res, next) => {
             }
         }
         let expertise = ''
-        if (documents.expertise !== '') {
+        if (documents.expertise !== '' && Object.keys(documents.expertise).length !== 0) {
             if (documents.expertise?.public_id == undefined) {
                 if (userDoesExist?.documents.expertise.public_id !== undefined) {
                     await cloudinary.uploader.destroy(userDoesExist?.documents.expertise.public_id, (error, result) => {
@@ -140,7 +140,7 @@ exports.editProfile = async (req, res, next) => {
             }
         }
         let acheivements = ''
-        if (documents.acheivements !== '') {
+        if (documents.acheivements !== '' && Object.keys(documents.acheivements).length !== 0) {
             if (documents.acheivements?.public_id == undefined) {
                 if (userDoesExist?.documents.acheivements.public_id !== undefined) {
                     await cloudinary.uploader.destroy(userDoesExist?.documents.acheivements.public_id, (error, result) => {
@@ -172,7 +172,7 @@ exports.editProfile = async (req, res, next) => {
             }
         }
         let degree = ''
-        if (documents.degree !== '') {
+        if (documents.degree !== '' && Object.keys(documents.degree).length !== 0) {
             if (documents.degree?.public_id == undefined) {
                 if (userDoesExist?.documents.degree.public_id !== undefined) {
                     await cloudinary.uploader.destroy(userDoesExist?.documents.degree.public_id, (error, result) => {
@@ -204,7 +204,7 @@ exports.editProfile = async (req, res, next) => {
             }
         }
         let working = ''
-        if (documents.working !== '') {
+        if (documents.working !== '' && Object.keys(documents.working).length !== 0) {
             if (documents.working?.public_id == undefined) {
                 if (userDoesExist?.documents.working.public_id !== undefined) {
                     await cloudinary.uploader.destroy(userDoesExist?.documents.working.public_id, (error, result) => {
@@ -241,24 +241,24 @@ exports.editProfile = async (req, res, next) => {
         if (userDoesExist) {
             await UserUpdate.updateOne({ email: email }, { $set: { userName, role, phone, verification: 'pending', documents: {
                 resume: {
-                    public_id: resume.public_id,
-                    secure_url: resume.secure_url
+                    public_id: resume?.public_id,
+                    secure_url: resume?.secure_url
                 },
                 expertise: {
-                    public_id: expertise.public_id,
-                    secure_url: expertise.secure_url
+                    public_id: expertise?.public_id,
+                    secure_url: expertise?.secure_url
                 },
                 acheivements: {
-                    public_id: acheivements.public_id,
-                    secure_url: acheivements.secure_url
+                    public_id: acheivements?.public_id,
+                    secure_url: acheivements?.secure_url
                 },
                 degree: {
-                    public_id: degree.public_id,
-                    secure_url: degree.secure_url
+                    public_id: degree?.public_id,
+                    secure_url: degree?.secure_url
                 },
                 working: {
-                    public_id: working.public_id,
-                    secure_url: working.secure_url
+                    public_id: working?.public_id,
+                    secure_url: working?.secure_url
                 },
             }
             }
@@ -279,24 +279,24 @@ exports.editProfile = async (req, res, next) => {
         await UserUpdate.create({
             email: email, role: role, userName: userName, phone: phone, verification: 'pending', documents: {
                 resume: {
-                    public_id: resume.public_id,
-                    secure_url: resume.secure_url
+                    public_id: resume?.public_id,
+                    secure_url: resume?.secure_url
                 },
                 expertise: {
-                    public_id: expertise.public_id,
-                    secure_url: expertise.secure_url
+                    public_id: expertise?.public_id,
+                    secure_url: expertise?.secure_url
                 },
                 acheivements: {
-                    public_id: acheivements.public_id,
-                    secure_url: acheivements.secure_url
+                    public_id: acheivements?.public_id,
+                    secure_url: acheivements?.secure_url
                 },
                 degree: {
-                    public_id: degree.public_id,
-                    secure_url: degree.secure_url
+                    public_id: degree?.public_id,
+                    secure_url: degree?.secure_url
                 },
                 working: {
-                    public_id: working.public_id,
-                    secure_url: working.secure_url
+                    public_id: working?.public_id,
+                    secure_url: working?.secure_url
                 },
             }
         })
