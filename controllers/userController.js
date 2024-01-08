@@ -435,11 +435,11 @@ exports.deleteProfileImage = async (req, res, next) => {
         }
         await User.updateOne({ email: email }, {
             $set: {
-                image: { url : ''}
+                image: ''
             }
         })
         const accessToken = await signAccessToken(
-            { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, verification: userDoesExist.verification, image: { url: '' } },
+            { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, verification: userDoesExist.verification, image: '' },
             `${userDoesExist._id}`
         );
         const refreshToken = await signRefreshToken(
