@@ -9,6 +9,15 @@ exports.fetchPendingPitch = async (req, res, next) => {
     }
 }
 
+exports.fetchSinglePitch = async (req, res, next) => {
+    try {
+        const pendingPitches = await Pitch.findOne({_id: req.body.pitchId})
+        return res.status(200).json(pendingPitches)
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
 exports.fetchLivePitch = async (req, res, next) => {
     try {
         const livePitches = await Pitch.find({ status: 'live' })
