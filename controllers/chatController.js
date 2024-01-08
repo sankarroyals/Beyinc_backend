@@ -17,23 +17,44 @@ const UserUpdate = require("../models/UpdateApproval");
 const cloudinary = require("../helpers/UploadImage");
 const Conversation = require("../models/ChatConversationModel");
 const Message = require("../models/MessageModel");
+const Pitch = require("../models/PitchModel");
 
 
 exports.addConversation = async (req, res, next) => {
     try {
+        const { form, email } = req.body;
+        const { title, tags, changeStatus, pitchId, pitch } = form;
         const conversationExists = await Conversation.find({
             members: { $all: [req.body.senderId, req.body.receiverId] }
         })
         if (conversationExists.length == 0) {
+            // check pitch is there or not
+            let pitchDetails = ''
+            if (changeStatus == 'change') {
+                let result = ''
+                if (pitch?.public_id == undefined) {
+                    result = await cloudinary.uploader.upload(pitch, {
+                        folder: `${email}/pitch`
+                    })
+                } else {
+                    result = pitch
+                }
+               pitchDetails = await Pitch.create({ email: email, tags: tags.split(','), title: title, status: 'pending', pitch: { secure_url: result?.secure_url, public_id: result?.public_id } })
+            }
+            
+            // adding conversation after pitch done
             await Conversation.create({
-                members: [req.body.senderId, req.body.receiverId], requestedTo: req.body.receiverId, status: 'pending'
+                members: [req.body.senderId, req.body.receiverId], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
             })
-            return res.status(200).send('New Conversation is added')
+            return res.status(200).send(`Message request sent to ${req.body.receiverId}`)
+        } else {
+            const text = conversationExists[0].status == 'pending' ? `Already request sent. It is in ${conversationExists[0].status} status` : `Already conversation approved by ${conversationExists[0].requestedTo}`
+            return res.status(200).send(text)
         }
-        return res.status(200).send('Already conversation is there')
 
     }
     catch (error) {
+        console.log(error);
         return res.status(400).send(error)
     }
 }

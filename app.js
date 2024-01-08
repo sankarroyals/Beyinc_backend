@@ -2,6 +2,8 @@ const express = require("express");
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
 const chatRouter = require('./routes/chatRouter')
+const pitchRouter = require('./routes/pitchRouter')
+
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpecs = require('./swagger');
 
@@ -28,6 +30,10 @@ app.use("/api/userDetails",
 app.use("/api/chat",
     verifyAccessToken,
     chatRouter);
+
+app.use("/api/pitch",
+    verifyAccessToken,
+    pitchRouter);
 
 
 module.exports = app;
