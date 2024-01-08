@@ -29,6 +29,10 @@ exports.addConversation = async (req, res, next) => {
         })
         if (conversationExists.length == 0) {
             // check pitch is there or not
+            const pitchTitleExists = await Pitch.find({ title: title })
+            if (pitchTitleExists) {
+                return res.status(400).send('Pitch Title already exists')
+            }
             let pitchDetails = ''
             if (changeStatus == 'change') {
                 let result = ''
