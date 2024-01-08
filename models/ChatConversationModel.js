@@ -9,6 +9,9 @@ const conversationSchema = new mongoose.Schema({
     },
     requestedTo: {
         type: String
+    }, 
+    pitchId: {
+        type: String
     }
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
