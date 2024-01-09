@@ -4,6 +4,12 @@ const pitchSchema = new mongoose.Schema({
     email: {
         type: String
     },
+    website: {
+        type: String
+    },
+    teamOverview: {
+        type: String
+    },
     business: {
         type: String
     },
@@ -102,6 +108,9 @@ const pitchSchema = new mongoose.Schema({
             type: String
         },
         socialLink: {
+            type: String
+        },
+        bio: {
             type: String
         }
     }]

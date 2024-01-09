@@ -78,21 +78,24 @@ exports.addConversation = async (req, res, next) => {
                 }
 
                 const teams = []
-                if (teamMembers.length > 0) {
-                    teamMembers.map(async (t) => {
-                        let singMemberDoc = ''
-                        if (t?.memberPic.public_id == undefined) {
-                            singMemberDoc = await cloudinary.uploader.upload(t?.memberPic, {
-                                folder: `${email}/pitch`
-                            })
-                        } else {
-                            singMemberDoc = t?.memberPic
-                        }
-                        teams.push({ memberPic: { secure_url: singMemberDoc?.secure_url, public_id: singMemberDoc?.public_id }, name: t?.name, position: t?.position, socialLink: t?.socialLink})
-                    })
+                for (let i = 0; i < teamMembers.length; i++) {
+                    let singMemberDoc = ''
+                    if (teamMembers[i]?.memberPic.public_id == undefined) {
+                        singMemberDoc = await cloudinary.uploader.upload(teamMembers[i]?.memberPic, {
+                            folder: `${email}/pitch`
+                        })
+                    } else {
+                        singMemberDoc = teamMembers[i]?.memberPic
+                    }
+
+                    teams.push({ memberPic: { secure_url: singMemberDoc?.secure_url, public_id: singMemberDoc?.public_id }, name: teamMembers[i]?.name, position: teamMembers[i]?.position, socialLink: teamMembers[i]?.socialLink, bio: teamMembers[i]?.bio })
+
                 }
 
                 // creating new pitch
+                if (form._id !== undefined) {
+                    delete form._id
+                }
                 pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], email: email, tags: tags.split(','), title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
