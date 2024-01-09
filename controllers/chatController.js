@@ -123,10 +123,11 @@ exports.updateMessageRequest = async (req, res, next) => {
             _id: req.body.conversationId
         })
         if (conversationExists) {
-            await Conversation.updateOne({ status: req.body.status })
             if (req.body.status == 'rejected') {
                 await Conversation.deleteOne({ _id: req.body.conversationId })
+                return res.status(200).send(`Message ${req.body.status}`)
             }
+            await Conversation.updateOne({ _id: req.body.conversationId }, { $set: { status: req.body.status } })
             return res.status(200).send(`Message ${req.body.status}`)
         }
         return res.status(400).send('Conversation not found')
