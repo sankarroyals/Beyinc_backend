@@ -22,31 +22,80 @@ const Pitch = require("../models/PitchModel");
 
 exports.addConversation = async (req, res, next) => {
     try {
-        const { form, email } = req.body;
-        const { title, tags, changeStatus, pitchId, pitch } = form;
+        const { form, email, teamMembers } = req.body;
+        const { title, tags, changeStatus, pitchId, pitch, banner, logo, financials } = form;
         const conversationExists = await Conversation.find({
             members: { $all: [req.body.senderId, req.body.receiverId] }
         })
         if (conversationExists.length == 0) {
             // check pitch is there or not
-           
+
             let pitchDetails = ''
             if (changeStatus == 'change') {
                 const pitchTitleExists = await Pitch.findOne({ title: title })
                 if (pitchTitleExists) {
                     return res.status(400).send('Pitch Title already exists')
                 }
-                let result = ''
+                let pitchDoc = ''
                 if (pitch?.public_id == undefined) {
-                    result = await cloudinary.uploader.upload(pitch, {
+                    pitchDoc = await cloudinary.uploader.upload(pitch, {
                         folder: `${email}/pitch`
                     })
                 } else {
-                    result = pitch
+                    pitchDoc = pitch
                 }
-               pitchDetails = await Pitch.create({ email: email, tags: tags.split(','), title: title, status: 'pending', pitch: { secure_url: result?.secure_url, public_id: result?.public_id } })
+
+
+                // uploading Banner image
+                let bannerDoc = ''
+                if (banner?.public_id == undefined) {
+                    bannerDoc = await cloudinary.uploader.upload(banner, {
+                        folder: `${email}/pitch`
+                    })
+                } else {
+                    bannerDoc = banner
+                }
+
+
+                // uploading logo image
+                let logoDoc = ''
+                if (logo?.public_id == undefined) {
+                    logoDoc = await cloudinary.uploader.upload(logo, {
+                        folder: `${email}/pitch`
+                    })
+                } else {
+                    logoDoc = logo
+                }
+
+                // uploading financials image
+                let financialsDoc = ''
+                if (financials?.public_id == undefined) {
+                    financialsDoc = await cloudinary.uploader.upload(financials, {
+                        folder: `${email}/pitch`
+                    })
+                } else {
+                    financialsDoc = financials
+                }
+
+                const teams = []
+                if (teamMembers.length > 0) {
+                    teamMembers.map(async (t) => {
+                        let singMemberDoc = ''
+                        if (t?.memberPic.public_id == undefined) {
+                            singMemberDoc = await cloudinary.uploader.upload(t?.memberPic, {
+                                folder: `${email}/pitch`
+                            })
+                        } else {
+                            singMemberDoc = t?.memberPic
+                        }
+                        teams.push({ memberPic: { secure_url: singMemberDoc?.secure_url, public_id: singMemberDoc?.public_id }, name: t?.name, position: t?.position, socialLink: t?.socialLink})
+                    })
+                }
+
+                // creating new pitch
+                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], email: email, tags: tags.split(','), title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
-            
+
             // adding conversation after pitch done
             await Conversation.create({
                 members: [req.body.senderId, req.body.receiverId], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
@@ -73,7 +122,7 @@ exports.updateMessageRequest = async (req, res, next) => {
         if (conversationExists) {
             await Conversation.updateOne({ status: req.body.status })
             if (req.body.status == 'rejected') {
-                await Conversation.deleteOne({ _id: req.body.conversationId })  
+                await Conversation.deleteOne({ _id: req.body.conversationId })
             }
             return res.status(200).send(`Message ${req.body.status}`)
         }
@@ -131,17 +180,17 @@ exports.deleteUserConversation = async (req, res, next) => {
 
 exports.addMessage = async (req, res, next) => {
     try {
-            const { file, email, conversationId, senderId, receiverId, message } = req.body
-            if (file !== '') {
-                const result = await cloudinary.uploader.upload(file, {
-                    folder: `${email}/chat`
-                }) 
-                await Message.create({ email, file: { public_id: result.public_id, secure_url: result.secure_url }, conversationId, senderId, receiverId, message })
-                return res.status(200).send('New Message is added')
+        const { file, email, conversationId, senderId, receiverId, message } = req.body
+        if (file !== '') {
+            const result = await cloudinary.uploader.upload(file, {
+                folder: `${email}/chat`
+            })
+            await Message.create({ email, file: { public_id: result.public_id, secure_url: result.secure_url }, conversationId, senderId, receiverId, message })
+            return res.status(200).send('New Message is added')
         }
         await Message.create({ email, file: '', conversationId, senderId, receiverId, message })
         return res.status(200).send('New Message is added')
-           
+
     }
     catch (error) {
         return res.status(400).send(error)
@@ -151,7 +200,7 @@ exports.addMessage = async (req, res, next) => {
 
 exports.deleteMessage = async (req, res, next) => {
     try {
-        const {messageId} =  req.body
+        const { messageId } = req.body
         await Message.deleteOne({ _id: messageId })
         return res.status(200).send('Message Deleted Successfully')
     }
@@ -164,7 +213,7 @@ exports.deleteMessage = async (req, res, next) => {
 exports.getMessage = async (req, res, next) => {
     try {
         const { conversationId } = req.body
-        const result = await Message.find({conversationId: conversationId})
+        const result = await Message.find({ conversationId: conversationId })
         return res.status(200).send(result)
     }
     catch (error) {
