@@ -232,9 +232,10 @@ exports.getMessage = async (req, res, next) => {
 
 exports.getFrienddetailsByConversationId = async (req, res, next) => {
     try {
-        const { conversationId } = req.body
+        const { conversationId, email } = req.body
         const result = await Conversation.findOne({ _id: conversationId })
-        const friend = await User.findOne({email: result.requestedTo})
+        const friendMail = await result.members.filter(f=>f!==email)[0]
+        const friend = await User.findOne({ email: friendMail })
         return res.status(200).send({email: friend.email, image: friend.image, userName: friend.userName})
     }
     catch (error) {
