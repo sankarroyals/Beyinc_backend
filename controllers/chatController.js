@@ -32,10 +32,10 @@ exports.addConversation = async (req, res, next) => {
 
             let pitchDetails = ''
             if (changeStatus == 'change') {
-                const pitchTitleExists = await Pitch.findOne({ title: title })
-                if (pitchTitleExists) {
-                    return res.status(400).send('Pitch Title already exists')
-                }
+                // const pitchTitleExists = await Pitch.findOne({ title: title })
+                // if (pitchTitleExists) {
+                //     return res.status(400).send('Pitch Title already exists')
+                // }
                 let pitchDoc = ''
                 if (pitch?.public_id == undefined) {
                     pitchDoc = await cloudinary.uploader.upload(pitch, {
@@ -219,6 +219,23 @@ exports.getMessage = async (req, res, next) => {
         const { conversationId } = req.body
         const result = await Message.find({ conversationId: conversationId })
         return res.status(200).send(result)
+    }
+    catch (error) {
+        return res.status(400).send(error)
+    }
+}
+
+
+
+
+
+
+exports.getFrienddetailsByConversationId = async (req, res, next) => {
+    try {
+        const { conversationId } = req.body
+        const result = await Conversation.findOne({ _id: conversationId })
+        const friend = await User.findOne({email: result.requestedTo})
+        return res.status(200).send({email: friend.email, image: friend.image, userName: friend.userName})
     }
     catch (error) {
         return res.status(400).send(error)
