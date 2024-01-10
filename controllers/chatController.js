@@ -32,10 +32,10 @@ exports.addConversation = async (req, res, next) => {
 
             let pitchDetails = ''
             if (changeStatus == 'change') {
-                const pitchTitleExists = await Pitch.findOne({ title: title })
-                if (pitchTitleExists) {
-                    return res.status(400).send('Pitch Title already exists')
-                }
+                // const pitchTitleExists = await Pitch.findOne({ title: title })
+                // if (pitchTitleExists) {
+                //     return res.status(400).send('Pitch Title already exists')
+                // }
                 let pitchDoc = ''
                 if (pitch?.public_id == undefined) {
                     pitchDoc = await cloudinary.uploader.upload(pitch, {
