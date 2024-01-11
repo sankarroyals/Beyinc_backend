@@ -32,6 +32,26 @@ exports.getProfile = async (req, res, next) => {
     }
 }
 
+
+exports.getApprovalRequestProfile = async (req, res, next) => {
+    try {
+        const { email } = req.body
+        const userDoesExist = await UserUpdate.findOne({ email: email });
+        const image = await User.findOne({ email: email });
+
+        if (userDoesExist) {
+            const removePass = { ...userDoesExist._doc, password: '', image: { ...image._doc.image } }
+            return res.status(200).json(removePass)
+        } else {
+            return res.status(400).json('No User Found for request')
+ 
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
 exports.editProfile = async (req, res, next) => {
     try {
         const { email, userName, role, phone, documents, experienceDetails } = req.body;
@@ -490,8 +510,8 @@ exports.getUsers = async (req, res, next) => {
 
 exports.getAllUserProfileRequests = async (req, res, next) => {
     try {
-        const {type} = req.body
-        const result = await UserUpdate.find({ verification: type })
+        const {filters} = req.body
+        const result = await UserUpdate.find()
         return res.status(200).json(result)
         
 
@@ -499,6 +519,8 @@ exports.getAllUserProfileRequests = async (req, res, next) => {
         return res.status(400).json('Error while fetching')
     }
 }
+
+
 
 
 

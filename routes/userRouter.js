@@ -55,6 +55,8 @@ const userController = require("../controllers/userController");
  */
 
 router.route("/getUser").post(userController.getProfile);
+router.route("/getApprovalRequestProfile").post(userController.getApprovalRequestProfile);
+
 
  
 router.route("/getUsers").post(userController.getUsers);
