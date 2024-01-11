@@ -55,7 +55,7 @@ exports.register = async (req, res, next) => {
       password: passwordHashing,
       phone,
       role,
-      userName,
+      userName, freeCoins: '100', realCoins: '0',
       verification: 'initial'
     });
     const userDetails = await User.findOne({ email: email });
@@ -99,7 +99,7 @@ exports.login = async (req, res, next) => {
       return res.status(404).json({ message: "Email/password is wrong" });
     } else {
       const accessToken = await signAccessToken(
-        { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+        { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
         `${userDoesExist._id}`
       );
       const refreshToken = await signRefreshToken(
@@ -163,7 +163,7 @@ exports.refreshToken = async (req, res, next) => {
     const { user_id, email } = await verifyRefreshToken(refreshToken);
     const userDoesExist = await User.findOne({ email: email });
     const accessToken = await signAccessToken(
-      { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
       `${user_id}`
     );
     const refreshtoken = await signRefreshToken(
@@ -187,7 +187,7 @@ exports.verifyMainAccessToken = async (req, res, next) => {
     const { email } = await verifyAPiAccessToken(accessToken);
     const userDoesExist = await User.findOne({email: email})
     const currentaccessToken = await signAccessToken(
-      { email: userDoesExist.email, coins: userDoesExist.coins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
       `${userDoesExist._id}`
     );
     const refreshToken = await signRefreshToken(
