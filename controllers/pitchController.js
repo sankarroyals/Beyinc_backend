@@ -34,8 +34,18 @@ exports.addCommentsToAPitch = async (req, res, next) => {
 
 exports.fetchLivePitch = async (req, res, next) => {
     try {
-        const livePitches = await Pitch.find({ status: 'live' })
+        const livePitches = await Pitch.find({ status: 'approved' })
         return res.status(200).json(livePitches)
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+
+exports.fetchAllPitch = async (req, res, next) => {
+    try {
+        const AllPitches = await Pitch.find()
+        return res.status(200).json(AllPitches)
     } catch (err) {
         return res.status(400).json(err)
     }
