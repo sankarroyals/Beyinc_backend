@@ -61,6 +61,10 @@ router.route("/getUsers").post(userController.getUsers);
 
 router.route("/verifyUserPassword").post(userController.verifyUserPassword);
 router.route("/editprofile").post(userController.editProfile);
+
+router.route("/getAllRequests").post(userController.getAllUserProfileRequests);
+
+
 router.route("/updateVerification").post(userController.updateVerification);
 router.route("/updateProfileImage").post(userController.updateProfileImage);
 router.route("/deleteProfileImage").post(userController.deleteProfileImage);

@@ -488,5 +488,20 @@ exports.getUsers = async (req, res, next) => {
 
 
 
+exports.getAllUserProfileRequests = async (req, res, next) => {
+    try {
+        const {type} = req.body
+        const result = await UserUpdate.find({ verification: type })
+        return res.status(200).json(result)
+        
+
+    } catch (err) {
+        return res.status(400).json('Error while fetching')
+    }
+}
+
+
+
+
 
 
