@@ -116,6 +116,30 @@ exports.addConversation = async (req, res, next) => {
     }
 }
 
+// Admin can create direct conversation
+exports.directConversationCreation = async (req, res, next) => {
+    try {
+       
+        const conversationExists = await Conversation.find({
+            members: { $all: [req.body.senderId, req.body.receiverId] }
+        })
+        if (conversationExists.length == 0) {
+            // adding conversation after pitch done
+            await Conversation.create({
+                members: [req.body.email, req.body.receiverId], requestedTo: req.body.receiverId, status: 'approved',
+            })
+            return res.status(200).send(`Conversation with ${req.body.receiverId} created`)
+        } else {
+            const text = conversationExists[0].status == 'pending' ? `Already request sent. It is in ${conversationExists[0].status} status` : `Already conversation with  ${conversationExists[0].requestedTo} is there`
+            return res.status(200).send(text)
+        }
+
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(400).send(error)
+    }
+}
 
 exports.updateMessageRequest = async (req, res, next) => {
     try {

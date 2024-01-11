@@ -4,6 +4,7 @@ const chatController = require("../controllers/chatController");
 
 
 router.route("/addConversation").post(chatController.addConversation);
+router.route("/directConversationCreation").post(chatController.directConversationCreation);
 router.route("/getConversation").post(chatController.findUserConversation);
 router.route("/deleteConversation").post(chatController.deleteUserConversation);
 router.route("/getUserRequest").post(chatController.fetchRequest);
