@@ -25,6 +25,17 @@ const userApprovalSchema = new mongoose.Schema({
     verification: {
         type: String
     },
+    experience: {
+        type: String
+    },
+    job: {
+        type: String
+    }, qualification: {
+        type: String
+    },
+    fee: {
+        type: String
+    },
     documents: {
 
         resume: {

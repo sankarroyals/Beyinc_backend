@@ -22,7 +22,7 @@ const Pitch = require("../models/PitchModel");
 
 exports.addConversation = async (req, res, next) => {
     try {
-        const { form, email, teamMembers } = req.body;
+        const { form, email, teamMembers, role } = req.body;
         const { title, tags, changeStatus, pitchId, pitch, banner, logo, financials } = form;
         const conversationExists = await Conversation.find({
             members: { $all: [req.body.senderId, req.body.receiverId] }
@@ -96,7 +96,7 @@ exports.addConversation = async (req, res, next) => {
                 if (form._id !== undefined) {
                     delete form._id
                 }
-                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], email: email, tags: tags.split(','), title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
+                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], email: email, role: role, tags: tags.split(','), title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
             // adding conversation after pitch done
@@ -116,6 +116,30 @@ exports.addConversation = async (req, res, next) => {
     }
 }
 
+// Admin can create direct conversation
+exports.directConversationCreation = async (req, res, next) => {
+    try {
+       
+        const conversationExists = await Conversation.find({
+            members: { $all: [req.body.senderId, req.body.receiverId] }
+        })
+        if (conversationExists.length == 0) {
+            // adding conversation after pitch done
+            await Conversation.create({
+                members: [req.body.email, req.body.receiverId], requestedTo: req.body.receiverId, status: 'approved',
+            })
+            return res.status(200).send(`Conversation with ${req.body.receiverId} created`)
+        } else {
+            const text = conversationExists[0].status == 'pending' ? `Already request sent. It is in ${conversationExists[0].status} status` : `Already conversation with  ${conversationExists[0].requestedTo} is there`
+            return res.status(200).send(text)
+        }
+
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(400).send(error)
+    }
+}
 
 exports.updateMessageRequest = async (req, res, next) => {
     try {

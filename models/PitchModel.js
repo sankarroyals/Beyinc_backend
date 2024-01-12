@@ -4,6 +4,9 @@ const pitchSchema = new mongoose.Schema({
     email: {
         type: String
     },
+    role: {
+        type: String
+    },
     website: {
         type: String
     },
@@ -113,6 +116,18 @@ const pitchSchema = new mongoose.Schema({
         bio: {
             type: String
         }
+    }],
+    comments: [{
+        email: {
+            type: String
+        }, 
+        comment: {
+            type: String
+        },
+        createdAt: {
+            type: Date
+        }
+
     }]
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields

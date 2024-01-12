@@ -32,9 +32,33 @@ exports.getProfile = async (req, res, next) => {
     }
 }
 
+
+exports.getApprovalRequestProfile = async (req, res, next) => {
+    try {
+        const { email } = req.body
+        const userDoesExist = await UserUpdate.findOne({ email: email });
+        const image = await User.findOne({ email: email });
+
+        if (userDoesExist) {
+            const removePass = { ...userDoesExist._doc, password: '', image: { ...image._doc.image } }
+            return res.status(200).json(removePass)
+        } else {
+            return res.status(400).json('No User Found for request')
+ 
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
+}
+
 exports.editProfile = async (req, res, next) => {
     try {
-        const { email, userName, role, phone, documents } = req.body;
+        const { email, userName, role, phone, documents, experienceDetails } = req.body;
+        const { experience,
+            job,
+            qualification,
+            fee } = experienceDetails
         // validating email and password
 
         const userDoesExist = await UserUpdate.findOne({ email: email });
@@ -239,7 +263,11 @@ exports.editProfile = async (req, res, next) => {
 
 
         if (userDoesExist) {
-            await UserUpdate.updateOne({ email: email }, { $set: { userName, role, phone, verification: 'pending', documents: {
+            await UserUpdate.updateOne({ email: email }, {
+                $set: {
+                    userName, role, phone, experience: experienceDetails.experience,
+                    job: experienceDetails.job, qualification: experienceDetails.qualification,
+                    fee: experienceDetails.fee, verification: 'pending', documents: {
                 resume: {
                     public_id: resume?.public_id,
                     secure_url: resume?.secure_url
@@ -266,7 +294,7 @@ exports.editProfile = async (req, res, next) => {
             await User.updateOne({ email: email }, { $set: { verification: 'pending' } })
             const userExist = await User.findOne({email: email})
             const accessToken = await signAccessToken(
-                { email: userExist.email, coins: userExist.coins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
+                { email: userExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
                 `${userExist._id}`
             );
             const refreshToken = await signRefreshToken(
@@ -329,7 +357,11 @@ exports.updateVerification = async (req, res, next) => {
         }
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
         if (status == 'approved') {
-            await User.updateOne({ email: email }, { $set: { email: userDoesExist.email, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
+            await User.updateOne({ email: email }, {
+                $set: {
+                    email: userDoesExist.email, experience: userDoesExist.experience,
+                    job: userDoesExist.job, qualification: userDoesExist.qualification,
+                    fee: userDoesExist.fee, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
         }
@@ -472,6 +504,23 @@ exports.getUsers = async (req, res, next) => {
         return res.status(400).json('Error while fetching')
     }
 }
+
+
+
+
+exports.getAllUserProfileRequests = async (req, res, next) => {
+    try {
+        const {filters} = req.body
+        const result = await UserUpdate.find()
+        return res.status(200).json(result)
+        
+
+    } catch (err) {
+        return res.status(400).json('Error while fetching')
+    }
+}
+
+
 
 
 
