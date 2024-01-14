@@ -305,7 +305,9 @@ exports.editProfile = async (req, res, next) => {
             return res.send({ accessToken: accessToken, refreshToken: refreshToken });
         }
         await UserUpdate.create({
-            email: email, role: role, userName: userName, phone: phone, verification: 'pending', documents: {
+            email: email, role: role, userName: userName, phone: phone, experience: experienceDetails.experience,
+            job: experienceDetails.job, qualification: experienceDetails.qualification,
+            fee: experienceDetails.fee, verification: 'pending', documents: {
                 resume: {
                     public_id: resume?.public_id,
                     secure_url: resume?.secure_url
