@@ -25,14 +25,16 @@ const userApprovalSchema = new mongoose.Schema({
     verification: {
         type: String
     },
-    experience: {
-        type: String
-    },
-    job: {
-        type: String
-    }, qualification: {
-        type: String
-    },
+    experienceDetails: [{
+        year: {type: String},
+        company: {type: String},
+        profession: {type: String},
+    }],
+    educationDetails: [{
+        year: {type: String},
+        grade: {type: String},
+        college: {type: String},
+    }],
     fee: {
         type: String
     }, bio: {
