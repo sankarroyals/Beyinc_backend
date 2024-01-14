@@ -45,7 +45,11 @@ const userSchema = new mongoose.Schema({
     },
     job: {
         type: String  
-    }, qualification: {
+    },
+    bio: {
+        type: String
+    },
+    qualification: {
         type: String
     },
     fee: {

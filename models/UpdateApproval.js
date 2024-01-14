@@ -35,6 +35,8 @@ const userApprovalSchema = new mongoose.Schema({
     },
     fee: {
         type: String
+    }, bio: {
+        type: String
     },
     documents: {
 
