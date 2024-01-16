@@ -19,6 +19,32 @@ exports.fetchSinglePitch = async (req, res, next) => {
 }
 
 
+exports.updateSinglePitch = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId })
+        if (pitch) {
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $set: { status: 'pending', pitchRequiredStatus: req.body.status } })
+            return res.status(200).json('Pitch updated')
+        }
+        return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+
+
+exports.fetchUserPitches = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        const result = await Pitch.find({ email: email })
+        return res.status(200).json(result)
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+
 exports.addCommentsToAPitch = async (req, res, next) => {
     try {
         const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId })

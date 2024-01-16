@@ -61,6 +61,18 @@ const pitchSchema = new mongoose.Schema({
     title: {
         type: String
     },
+    heading: {
+        type: String
+    },
+    description: {
+        type: String
+    },
+    hiringPositions: {
+        type: String
+    },
+    pitchRequiredStatus: {
+        type: String
+    },
     status: {
         type: String
     },
