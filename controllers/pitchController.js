@@ -60,7 +60,7 @@ exports.addPitchComment = async (req, res, next) => {
     try {
         const pitch = await Pitch.findOne({ _id: req.body.pitchId })
         if (pitch) {
-            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'comments': req.body.comment }  })
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'comments': {...req.body.comment, createdAt: new Date()} }  })
             return res.status(200).json('Comment added')
 
         }
