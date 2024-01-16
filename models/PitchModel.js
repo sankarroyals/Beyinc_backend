@@ -140,6 +140,19 @@ const pitchSchema = new mongoose.Schema({
             type: Date
         }
 
+    }],
+    intrest: { type: Array },
+    review: [{
+        email: {
+            type: String
+        },
+        review: {
+            type: Number
+        },
+        createdAt: {
+            type: Date
+        }
+
     }]
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields

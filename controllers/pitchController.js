@@ -70,6 +70,65 @@ exports.addPitchComment = async (req, res, next) => {
     }
 }
 
+exports.addIntrest = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId })
+        if (pitch) {
+            const userExist = await Pitch.findOne({ _id: req.body.pitchId, intrest: { $in: [req.body.email] } })
+            if (userExist) {
+                return res.status(400).json('user already in the intrest list')
+            }
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': req.body.email } })
+            return res.status(200).json('Intrest added')
+
+        }
+        return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+
+exports.removeFromIntrest = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId })
+        if (pitch) {
+            const userExist = await Pitch.findOne({ _id: req.body.pitchId, intrest: { $in: [req.body.email] } })
+            if (userExist) {
+                await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': req.body.email } })
+                return res.status(200).json('User removed from intrest list')
+            }
+            return res.status(400).json('user not in the intrest list')
+
+        }
+        return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+
+
+exports.addReviewStars = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId })
+        if (pitch) {
+            const userExists = await Pitch.findOne({ '_id': req.body.pitchId, 'review.email': req.body.review.email })
+            if (userExists) {
+                await Pitch.updateOne({ '_id': req.body.pitchId, 'review.email': req.body.review.email }, { 'review.$.review': req.body.review.review})
+                return res.status(200).json('Review updated')
+
+            }
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'review': req.body.review } })
+            return res.status(200).json('Review added')
+
+        }
+        return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
 
 exports.fetchAllPitch = async (req, res, next) => {
     try {
