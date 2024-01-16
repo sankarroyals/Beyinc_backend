@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const pitchSchema = new mongoose.Schema({
     email: {
         type: String
+    }, profile_pic: {
+        type: String
+    }, userName: {
+        type: String
     },
     role: {
         type: String

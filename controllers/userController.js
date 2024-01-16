@@ -260,9 +260,11 @@ exports.editProfile = async (req, res, next) => {
 
 
         if (userDoesExist) {
+            const userExist = await User.findOne({ email: email })
+
             await UserUpdate.updateOne({ email: email }, {
                 $set: {
-                    userName, role, phone, experienceDetails: experienceDetails, educationDetails: educationdetails,
+                    userName, image: userExist?.image?.url, role, phone, experienceDetails: experienceDetails, educationDetails: educationdetails,
                     fee: fee, bio: bio, verification: 'pending', documents: {
                 resume: {
                     public_id: resume?.public_id,
@@ -288,7 +290,6 @@ exports.editProfile = async (req, res, next) => {
             }
             })
             await User.updateOne({ email: email }, { $set: { verification: 'pending' } })
-            const userExist = await User.findOne({email: email})
             const accessToken = await signAccessToken(
                 { email: userExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
                 `${userExist._id}`
@@ -300,9 +301,11 @@ exports.editProfile = async (req, res, next) => {
 
             return res.send({ accessToken: accessToken, refreshToken: refreshToken });
         }
+
+        const userExist = await User.findOne({ email: email })
         await UserUpdate.create({
             email: email, role: role, userName: userName, phone: phone, experienceDetails: experienceDetails, educationDetails: educationdetails,
-            fee: fee, bio: bio, verification: 'pending', documents: {
+            fee: fee, bio: bio, image: userExist?.image?.url, verification: 'pending', documents: {
                 resume: {
                     public_id: resume?.public_id,
                     secure_url: resume?.secure_url
@@ -327,7 +330,6 @@ exports.editProfile = async (req, res, next) => {
         })
         await User.updateOne({ email: email }, { $set: {verification: 'pending' } })
 
-        const userExist = await User.findOne({ email: email })
         const accessToken = await signAccessToken(
             { email: userExist.email, coins: userExist.coins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
             `${userExist._id}`

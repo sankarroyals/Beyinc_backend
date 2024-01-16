@@ -25,7 +25,7 @@ exports.addConversation = async (req, res, next) => {
         const { form, email, teamMembers, role, tags } = req.body;
         const { title, changeStatus, pitchId, pitch, banner, logo, financials } = form;
         const conversationExists = await Conversation.find({
-            members: { $all: [req.body.senderId, req.body.receiverId] }
+            'members.email': { $all: [req.body.senderId, req.body.receiverId] }
         })
         if (conversationExists.length == 0) {
             // check pitch is there or not
@@ -96,12 +96,19 @@ exports.addConversation = async (req, res, next) => {
                 if (form._id !== undefined) {
                     delete form._id
                 }
-                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], email: email, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
+                const userExist = await User.findOne({email: email})
+                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
+            const senderInfo = await User.findOne({ email: req.body.senderId });
+            const receiverInfo = await User.findOne({ email: req.body.receiverId });
             // adding conversation after pitch done
             await Conversation.create({
-                members: [req.body.senderId, req.body.receiverId], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
+                members: [{
+                    email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role,
+                }, {
+                    email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role,
+                }], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
             })
             return res.status(200).send(`Message request sent to ${req.body.receiverId}`)
         } else {
@@ -121,12 +128,18 @@ exports.directConversationCreation = async (req, res, next) => {
     try {
        
         const conversationExists = await Conversation.find({
-            members: { $all: [req.body.senderId, req.body.receiverId] }
+            'members.email': { $all: [req.body.senderId, req.body.receiverId] }
         })
         if (conversationExists.length == 0) {
             // adding conversation after pitch done
+            const senderInfo = await User.findOne({ email: req.body.senderId });
+            const receiverInfo = await User.findOne({ email: req.body.receiverId });
             await Conversation.create({
-                members: [req.body.email, req.body.receiverId], requestedTo: req.body.receiverId, status: 'approved',
+                members: [{
+                    email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role
+                }, {
+                    email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role
+                }], requestedTo: req.body.receiverId, status: 'approved',
             })
             return res.status(200).send(`Conversation with ${req.body.receiverId} created`)
         } else {
@@ -178,7 +191,7 @@ exports.fetchRequest = async (req, res, next) => {
 exports.findUserConversation = async (req, res, next) => {
     try {
         const conversationExists = await Conversation.find({
-            members: { $in: [req.body.email] }
+            'members.email': { $in: [req.body.email] }
         })
         if (conversationExists) {
             return res.status(200).json(conversationExists)
@@ -258,9 +271,8 @@ exports.getFrienddetailsByConversationId = async (req, res, next) => {
     try {
         const { conversationId, email } = req.body
         const result = await Conversation.findOne({ _id: conversationId })
-        const friendMail = await result.members.filter(f=>f!==email)[0]
-        const friend = await User.findOne({ email: friendMail })
-        return res.status(200).send({email: friend.email, image: friend.image, userName: friend.userName})
+        const friendMail = await result.members.filter(f=>f.email!==email)[0]
+        return res.status(200).send(friendMail)
     }
     catch (error) {
         return res.status(400).send(error)
