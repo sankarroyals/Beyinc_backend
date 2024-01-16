@@ -49,7 +49,7 @@ exports.fetchUserPitches = async (req, res, next) => {
 
 exports.fetchLivePitch = async (req, res, next) => {
     try {
-        const livePitches = await Pitch.find({ status: 'approved' })
+        const livePitches = await Pitch.find({ status: 'approved', pitchRequiredStatus: 'show' })
         return res.status(200).json(livePitches)
     } catch (err) {
         return res.status(400).json(err)
