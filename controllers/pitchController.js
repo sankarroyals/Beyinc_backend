@@ -1,4 +1,5 @@
 const Pitch = require("../models/PitchModel")
+const User = require("../models/UserModel")
 
 exports.fetchPendingPitch = async (req, res, next) => {
     try {
@@ -60,7 +61,8 @@ exports.addPitchComment = async (req, res, next) => {
     try {
         const pitch = await Pitch.findOne({ _id: req.body.pitchId })
         if (pitch) {
-            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'comments': {...req.body.comment, createdAt: new Date()} }  })
+            const user = await User.findOne({ email: req.body.comment.email })
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'comments': { ...req.body.comment, userName: user.userName, profile_pic: user.image?.url, createdAt: new Date()} }  })
             return res.status(200).json('Comment added')
 
         }

@@ -133,6 +133,12 @@ const pitchSchema = new mongoose.Schema({
         email: {
             type: String
         }, 
+        profile_pic: {
+            type: String
+        },
+        userName: {
+            type: String
+        },
         comment: {
             type: String
         },
