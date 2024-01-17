@@ -37,14 +37,20 @@ const userSchema = new mongoose.Schema({
     freeCoins: {
         type: String
     },
+    state: { type: String },
+    town: { type: String },
     realCoins: {
         type: String
     }, experienceDetails: [{
+        start: { type: String },
+        end: { type: String },
         year: { type: String },
         company: { type: String },
         profession: { type: String },
     }],
     educationDetails: [{
+        Edstart: { type: String },
+        Edend: { type: String },
         year: { type: String },
         grade: { type: String },
         college: { type: String },

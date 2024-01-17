@@ -54,7 +54,7 @@ exports.getApprovalRequestProfile = async (req, res, next) => {
 
 exports.editProfile = async (req, res, next) => {
     try {
-        const { email, userName, role, phone, documents, experienceDetails, educationdetails, fee, bio } = req.body;
+        const { email, userName, role, phone, documents, experienceDetails, educationdetails, fee, bio, state, town } = req.body;
 
         // validating email and password
 
@@ -264,7 +264,7 @@ exports.editProfile = async (req, res, next) => {
 
             await UserUpdate.updateOne({ email: email }, {
                 $set: {
-                    userName, image: userExist?.image?.url, role, phone, experienceDetails: experienceDetails, educationDetails: educationdetails,
+                    userName, image: userExist?.image?.url, role, phone, state:state, town:town, experienceDetails: experienceDetails, educationDetails: educationdetails,
                     fee: fee, bio: bio, verification: 'pending', documents: {
                 resume: {
                     public_id: resume?.public_id,
@@ -304,7 +304,7 @@ exports.editProfile = async (req, res, next) => {
 
         const userExist = await User.findOne({ email: email })
         await UserUpdate.create({
-            email: email, role: role, userName: userName, phone: phone, experienceDetails: experienceDetails, educationDetails: educationdetails,
+            email: email, role: role, userName: userName, phone: phone, state: state, town: town, experienceDetails: experienceDetails, educationDetails: educationdetails,
             fee: fee, bio: bio, image: userExist?.image?.url, verification: 'pending', documents: {
                 resume: {
                     public_id: resume?.public_id,
@@ -358,7 +358,7 @@ exports.updateVerification = async (req, res, next) => {
         if (status == 'approved') {
             await User.updateOne({ email: email }, {
                 $set: {
-                    email: userDoesExist.email, experienceDetails: userDoesExist.experienceDetails, educationDetails: userDoesExist.educationDetails, bio: userDoesExist.bio,
+                    email: userDoesExist.email, state: userDoesExist.state, town: userDoesExist.town, experienceDetails: userDoesExist.experienceDetails, educationDetails: userDoesExist.educationDetails, bio: userDoesExist.bio,
                     fee: userDoesExist.fee, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })

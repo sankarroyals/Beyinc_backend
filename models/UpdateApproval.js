@@ -19,6 +19,8 @@ const userApprovalSchema = new mongoose.Schema({
     image: {
         type: String
     },
+    state: { type: String },
+    town: { type: String },
     role: {
         type: String
     },
@@ -26,11 +28,15 @@ const userApprovalSchema = new mongoose.Schema({
         type: String
     },
     experienceDetails: [{
+        start: { type: String },
+        end: { type: String },
         year: {type: String},
         company: {type: String},
         profession: {type: String},
     }],
     educationDetails: [{
+        Edstart: { type: String },
+        Edend: { type: String },
         year: {type: String},
         grade: {type: String},
         college: {type: String},
