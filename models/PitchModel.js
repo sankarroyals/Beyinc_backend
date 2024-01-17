@@ -151,7 +151,20 @@ const pitchSchema = new mongoose.Schema({
         }
 
     }],
-    intrest: { type: Array },
+    intrest: [{
+        email: {
+            type: String
+        },
+        userName: {
+            type: String
+        }, profile_pic: {
+            type: String
+        },
+        createdAt: {
+            type: Date
+        }
+
+    }],
     review: [{
         email: {
             type: String
