@@ -22,7 +22,7 @@ const Pitch = require("../models/PitchModel");
 
 exports.addConversation = async (req, res, next) => {
     try {
-        const { form, email, teamMembers, role, tags } = req.body;
+        const { form, email, teamMembers, role, tags, pitchRequiredStatus } = req.body;
         const { title, changeStatus, pitchId, pitch, banner, logo, financials } = form;
         const conversationExists = await Conversation.find({
             'members.email': { $all: [req.body.senderId, req.body.receiverId] }
@@ -97,7 +97,7 @@ exports.addConversation = async (req, res, next) => {
                     delete form._id
                 }
                 const userExist = await User.findOne({email: email})
-                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
+                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
             const senderInfo = await User.findOne({ email: req.body.senderId });
