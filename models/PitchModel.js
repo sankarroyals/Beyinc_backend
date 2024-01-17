@@ -3,6 +3,10 @@ const mongoose = require('mongoose');
 const pitchSchema = new mongoose.Schema({
     email: {
         type: String
+    }, profile_pic: {
+        type: String
+    }, userName: {
+        type: String
     },
     role: {
         type: String
@@ -59,6 +63,18 @@ const pitchSchema = new mongoose.Schema({
         type: Array
     },
     title: {
+        type: String
+    },
+    heading: {
+        type: String
+    },
+    description: {
+        type: String
+    },
+    hiringPositions: {
+        type: String
+    },
+    pitchRequiredStatus: {
         type: String
     },
     status: {
@@ -121,8 +137,27 @@ const pitchSchema = new mongoose.Schema({
         email: {
             type: String
         }, 
+        profile_pic: {
+            type: String
+        },
+        userName: {
+            type: String
+        },
         comment: {
             type: String
+        },
+        createdAt: {
+            type: Date
+        }
+
+    }],
+    intrest: { type: Array },
+    review: [{
+        email: {
+            type: String
+        },
+        review: {
+            type: Number
         },
         createdAt: {
             type: Date
