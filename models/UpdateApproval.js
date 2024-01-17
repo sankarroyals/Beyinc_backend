@@ -21,6 +21,8 @@ const userApprovalSchema = new mongoose.Schema({
     },
     state: { type: String },
     town: { type: String },
+    country: { type: String },
+
     role: {
         type: String
     },
