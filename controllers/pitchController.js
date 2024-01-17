@@ -72,15 +72,30 @@ exports.addPitchComment = async (req, res, next) => {
     }
 }
 
+exports.removePitchComment = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId })
+        if (pitch) {
+            const commentExist = await Pitch.findOne({ 'comments._id': req.body.commentId })
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'comments': { _id: req.body.commentId } } })
+            return res.status(200).json('Comment Deleted')
+        }
+        return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
 exports.addIntrest = async (req, res, next) => {
     try {
         const pitch = await Pitch.findOne({ _id: req.body.pitchId })
         if (pitch) {
-            const userExist = await Pitch.findOne({ _id: req.body.pitchId, intrest: { $in: [req.body.email] } })
+            const userExist = await Pitch.findOne({ _id: req.body.pitchId, 'intrest.email': { $in: [req.body.email] } })
             if (userExist) {
                 return res.status(400).json('user already in the intrest list')
             }
-            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': req.body.email } })
+            const user = await User.findOne({email: req.body.email})
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': {email:req.body.email, profile_pic: user.image?.url, userName: user.userName} } })
             return res.status(200).json('Intrest added')
 
         }
@@ -95,9 +110,9 @@ exports.removeFromIntrest = async (req, res, next) => {
     try {
         const pitch = await Pitch.findOne({ _id: req.body.pitchId })
         if (pitch) {
-            const userExist = await Pitch.findOne({ _id: req.body.pitchId, intrest: { $in: [req.body.email] } })
+            const userExist = await Pitch.findOne({ _id: req.body.pitchId, 'intrest.email': { $in: [req.body.email] } })
             if (userExist) {
-                await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': req.body.email } })
+                await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': {email: req.body.email} } })
                 return res.status(200).json('User removed from intrest list')
             }
             return res.status(400).json('user not in the intrest list')
@@ -126,6 +141,19 @@ exports.addReviewStars = async (req, res, next) => {
 
         }
         return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+exports.getReviewStars = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId, 'review.email': req.body.email }, { 'review.$': 1 })
+        if (pitch) {
+            return res.status(200).json(pitch.review.length > 0 && pitch.review[0])
+
+        }
+        return res.status(200).json({})
     } catch (err) {
         return res.status(400).json(err)
     }

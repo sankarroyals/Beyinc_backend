@@ -8,10 +8,13 @@ router.route("/allPitches").get(pitchController.fetchAllPitch);
 router.route("/userPitches").post(pitchController.fetchUserPitches);
 router.route("/updatePitch").post(pitchController.updateSinglePitch);
 router.route("/addPitchComment").post(pitchController.addPitchComment);
+router.route("/removePitchComment").post(pitchController.removePitchComment);
+
 router.route("/addIntrest").post(pitchController.addIntrest);
 router.route("/removeFromIntrest").post(pitchController.removeFromIntrest);
 
 router.route("/addStar").post(pitchController.addReviewStars);
+router.route("/getStar").post(pitchController.getReviewStars);
 
 
 
