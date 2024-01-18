@@ -18,6 +18,7 @@ const cloudinary = require("../helpers/UploadImage");
 const Conversation = require("../models/ChatConversationModel");
 const Message = require("../models/MessageModel");
 const Pitch = require("../models/PitchModel");
+const send_Notification_mail = require("../helpers/EmailSending");
 
 
 exports.addConversation = async (req, res, next) => {
@@ -114,6 +115,7 @@ exports.addConversation = async (req, res, next) => {
                     email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role,
                 }], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
             })
+            await send_Notification_mail(senderInfo.email, receiverInfo.email, `Message Request from ${senderInfo.email}` ,`${senderInfo.email} sent a message request please check the notification section.`)
             return res.status(200).send(`Message request sent to ${req.body.receiverId}`)
         } else {
             const text = conversationExists[0].status == 'pending' ? `Already request sent. It is in ${conversationExists[0].status} status` : `Already conversation approved by ${conversationExists[0].requestedTo}`
