@@ -15,6 +15,7 @@ dotenv.config({ path: "../config.env" });
 const twilio = require("twilio");
 const UserUpdate = require("../models/UpdateApproval");
 const cloudinary = require("../helpers/UploadImage");
+const Notification = require("../models/NotificationModel");
 
 
 exports.getProfile = async (req, res, next) => {
@@ -363,6 +364,8 @@ exports.updateVerification = async (req, res, next) => {
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
         }
+        await Notification.create({ receiver: email, message: `Your update profile status has been updated to ${req.body.status} by the admin`, type: 'user', read: false })
+
         return res.send({ message: `Profile status is ${status} !` });
 
     } catch (err) {

@@ -100,7 +100,7 @@ exports.addIntrest = async (req, res, next) => {
             const user = await User.findOne({email: req.body.email})
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': {email:req.body.email, profile_pic: user.image?.url, userName: user.userName} } })
             await send_Notification_mail(pitch.email, pitch.email, `Added new Intrest !`, `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list. Check notification for more info.`)
-            await Notification.create({ sender: user.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list.`, type: 'pitch' })
+            await Notification.create({ sender: user.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list.`, type: 'pitch', read: false })
             return res.status(200).json('Intrest added')
 
         }
@@ -179,6 +179,8 @@ exports.changePitchStatus = async (req, res, next) => {
         const pitch = await Pitch.findOne({_id: pitchId})
         const changedPitch = await Pitch.updateOne({ _id: pitchId }, { $set: { status: status } })
         await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`)
+        await Notification.create({ receiver: pitch.email, message: `For ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`, type: 'pitch', read: false })
+
         return res.status(200).json(changedPitch)
     } catch (err) {
         return res.status(400).json(err)

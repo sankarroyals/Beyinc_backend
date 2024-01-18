@@ -16,6 +16,8 @@ const NotificationSchema = new mongoose.Schema({
     },
     type: {
         type: String
+    }, read: {
+        type: Boolean
     }
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
