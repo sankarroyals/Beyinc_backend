@@ -1,3 +1,4 @@
+const send_Notification_mail = require("../helpers/EmailSending")
 const Pitch = require("../models/PitchModel")
 const User = require("../models/UserModel")
 
@@ -25,6 +26,7 @@ exports.updateSinglePitch = async (req, res, next) => {
         const pitch = await Pitch.findOne({ _id: req.body.pitchId })
         if (pitch) {
             await Pitch.updateOne({ _id: req.body.pitchId }, { $set: { status: 'pending', pitchRequiredStatus: req.body.status } })
+            await send_Notification_mail(pitch.email, pitch.email, `Pitch required status update !`, `For ${pitch.title}(${pitch._id}) required status has been updated to ${req.body.status}`)
             return res.status(200).json('Pitch updated')
         }
         return res.status(400).json('No Pitch Found')
@@ -96,6 +98,7 @@ exports.addIntrest = async (req, res, next) => {
             }
             const user = await User.findOne({email: req.body.email})
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': {email:req.body.email, profile_pic: user.image?.url, userName: user.userName} } })
+            await send_Notification_mail(pitch.email, pitch.email, `Added new Intrest !`, `For ${pitch.title}(${pitch._id}) the ${user.userName} has added into their interest list. Check notification for more info.`)
             return res.status(200).json('Intrest added')
 
         }
@@ -171,8 +174,10 @@ exports.fetchAllPitch = async (req, res, next) => {
 
 exports.changePitchStatus = async (req, res, next) => {
     try {
-        const { pitchId , status} = req.body; 
+        const { pitchId, status } = req.body; 
+        const pitch = await Pitch.findOne({_id: pitchId})
         const changedPitch = await Pitch.updateOne({ _id: pitchId }, { $set: { status: status } })
+        await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`)
         return res.status(200).json(changedPitch)
     } catch (err) {
         return res.status(400).json(err)
