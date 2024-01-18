@@ -40,10 +40,12 @@ const userSchema = new mongoose.Schema({
     state: { type: String },
     town: { type: String },
     country: { type: String },
+    
 
     realCoins: {
         type: String
     }, experienceDetails: [{
+        domain: { type: String },
         start: { type: String },
         end: { type: String },
         year: { type: String },

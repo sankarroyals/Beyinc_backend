@@ -8,6 +8,9 @@ const pitchSchema = new mongoose.Schema({
     }, userName: {
         type: String
     },
+    state: { type: String },
+    town: { type: String },
+    country: { type: String },
     role: {
         type: String
     },
@@ -20,7 +23,7 @@ const pitchSchema = new mongoose.Schema({
     business: {
         type: String
     },
-    country: {
+    memberscountry: {
         type: String
     },
     industry1: {
@@ -72,7 +75,7 @@ const pitchSchema = new mongoose.Schema({
         type: String
     },
     hiringPositions: {
-        type: String
+        type: Array
     },
     pitchRequiredStatus: {
         type: String
