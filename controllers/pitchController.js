@@ -1,4 +1,5 @@
 const send_Notification_mail = require("../helpers/EmailSending")
+const Notification = require("../models/NotificationModel")
 const Pitch = require("../models/PitchModel")
 const User = require("../models/UserModel")
 
@@ -98,7 +99,8 @@ exports.addIntrest = async (req, res, next) => {
             }
             const user = await User.findOne({email: req.body.email})
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': {email:req.body.email, profile_pic: user.image?.url, userName: user.userName} } })
-            await send_Notification_mail(pitch.email, pitch.email, `Added new Intrest !`, `For ${pitch.title}(${pitch._id}) the ${user.userName} has added into their interest list. Check notification for more info.`)
+            await send_Notification_mail(pitch.email, pitch.email, `Added new Intrest !`, `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list. Check notification for more info.`)
+            await Notification.create({ sender: user.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list.`, type: 'pitch' })
             return res.status(200).json('Intrest added')
 
         }
@@ -115,7 +117,7 @@ exports.removeFromIntrest = async (req, res, next) => {
         if (pitch) {
             const userExist = await Pitch.findOne({ _id: req.body.pitchId, 'intrest.email': { $in: [req.body.email] } })
             if (userExist) {
-                await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': {email: req.body.email} } })
+                await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': { email: req.body.email } } })
                 return res.status(200).json('User removed from intrest list')
             }
             return res.status(400).json('user not in the intrest list')
@@ -137,7 +139,6 @@ exports.addReviewStars = async (req, res, next) => {
             if (userExists) {
                 await Pitch.updateOne({ '_id': req.body.pitchId, 'review.email': req.body.review.email }, { 'review.$.review': req.body.review.review})
                 return res.status(200).json('Review updated')
-
             }
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'review': req.body.review } })
             return res.status(200).json('Review added')
