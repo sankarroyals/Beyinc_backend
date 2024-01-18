@@ -30,6 +30,7 @@ const userApprovalSchema = new mongoose.Schema({
         type: String
     },
     experienceDetails: [{
+        domain: { type: String },
         start: { type: String },
         end: { type: String },
         year: {type: String},

@@ -291,7 +291,7 @@ exports.editProfile = async (req, res, next) => {
             })
             await User.updateOne({ email: email }, { $set: { verification: 'pending' } })
             const accessToken = await signAccessToken(
-                { email: userExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
+                { email: userExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: 'pending' },
                 `${userExist._id}`
             );
             const refreshToken = await signRefreshToken(
@@ -331,7 +331,7 @@ exports.editProfile = async (req, res, next) => {
         await User.updateOne({ email: email }, { $set: {verification: 'pending' } })
 
         const accessToken = await signAccessToken(
-            { email: userExist.email, coins: userExist.coins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: userExist.verification },
+            { email: userExist.email, coins: userExist.coins, documents: userExist.documents, user_id: userExist._id, role: userExist.role, userName: userExist.userName, image: userExist.image?.url, verification: 'pending' },
             `${userExist._id}`
         );
         const refreshToken = await signRefreshToken(
