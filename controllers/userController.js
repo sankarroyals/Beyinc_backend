@@ -16,6 +16,7 @@ const twilio = require("twilio");
 const UserUpdate = require("../models/UpdateApproval");
 const cloudinary = require("../helpers/UploadImage");
 const Notification = require("../models/NotificationModel");
+const send_Notification_mail = require("../helpers/EmailSending");
 
 
 exports.getProfile = async (req, res, next) => {
