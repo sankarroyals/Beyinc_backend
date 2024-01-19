@@ -29,6 +29,10 @@ const pitchSchema = new mongoose.Schema({
     industry1: {
         type: String
     },
+    industry2: {
+        type: String
+    },
+    userColleges: {type: Array},
     idealInvestor: {
         type: String
     },

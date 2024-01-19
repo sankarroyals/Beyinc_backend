@@ -3,6 +3,8 @@ const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
 const chatRouter = require('./routes/chatRouter')
 const pitchRouter = require('./routes/pitchRouter')
+const NotificationRouter = require('./routes/NotificationRouter')
+
 const rolerouter = require('./routes/rolesRouter')
 
 const swaggerUi = require('swagger-ui-express');
@@ -35,6 +37,10 @@ app.use("/api/chat",
 app.use("/api/pitch",
     verifyAccessToken,
     pitchRouter);
+
+app.use("/api/notification",
+    verifyAccessToken,
+    NotificationRouter);
 
 app.use("/api/role",
     rolerouter);

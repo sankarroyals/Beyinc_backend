@@ -18,6 +18,8 @@ const cloudinary = require("../helpers/UploadImage");
 const Conversation = require("../models/ChatConversationModel");
 const Message = require("../models/MessageModel");
 const Pitch = require("../models/PitchModel");
+const send_Notification_mail = require("../helpers/EmailSending");
+const Notification = require("../models/NotificationModel");
 
 
 exports.addConversation = async (req, res, next) => {
@@ -96,8 +98,12 @@ exports.addConversation = async (req, res, next) => {
                 if (form._id !== undefined) {
                     delete form._id
                 }
-                const userExist = await User.findOne({email: email})
-                pitchDetails = await Pitch.create({ ...form, teamMembers: [...teams], state: userExist.state, country: userExist.country, town: userExist.town, pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
+                const userExist = await User.findOne({ email: email })
+                const colleges = []
+                for (let i = 0; i < userExist.educationDetails.length; i++) {
+                    colleges.push(userExist.educationDetails[i].college)
+                }
+                pitchDetails = await Pitch.create({ ...form, userColleges: colleges, teamMembers: [...teams], state: userExist.state, country: userExist.country, town: userExist.town, pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
             const senderInfo = await User.findOne({ email: req.body.senderId });
@@ -110,6 +116,7 @@ exports.addConversation = async (req, res, next) => {
                     email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role,
                 }], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
             })
+            await send_Notification_mail(senderInfo.email, receiverInfo.email, `Message Request from ${senderInfo.email}`, `${senderInfo.email} sent a message request please check the notification section.`)
             return res.status(200).send(`Message request sent to ${req.body.receiverId}`)
         } else {
             const text = conversationExists[0].status == 'pending' ? `Already request sent. It is in ${conversationExists[0].status} status` : `Already conversation approved by ${conversationExists[0].requestedTo}`
