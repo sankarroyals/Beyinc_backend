@@ -364,7 +364,8 @@ exports.updateVerification = async (req, res, next) => {
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
         }
-        await Notification.create({ receiver: email, message: `Your update profile status has been updated to ${req.body.status} by the admin`, type: 'user', read: false })
+        await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
+        await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'user', read: false })
 
         return res.send({ message: `Profile status is ${status} !` });
 
