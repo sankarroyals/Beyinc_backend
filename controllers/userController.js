@@ -494,10 +494,10 @@ exports.getUsers = async (req, res, next) => {
     try {
         const { type } = req.body
         if (type !== '') {
-            let result = await User.find({ role: type })
+            let result = await User.find({ role: type }, { projection: { password: 0 } })
             return res.status(200).json(result)
         } else {
-            let result = await User.find()
+            let result = await User.find({}, {password: 0 })
             return res.status(200).json(result)
         }
 
