@@ -552,7 +552,7 @@ exports.addUserReviewStars = async (req, res, next) => {
 
 exports.getUserReviewStars = async (req, res, next) => {
     try {
-        const user = await User.findOne({ _id: req.body.userId, 'review.email': req.body.email }, { 'review.$': 1 })
+        const user = await User.findOne({ email: req.body.userEmail, 'review.email': req.body.email }, { 'review.$': 1 })
         if (user) {
             return res.status(200).json(user.review.length > 0 && user.review[0])
 
@@ -567,10 +567,10 @@ exports.getUserReviewStars = async (req, res, next) => {
 
 exports.addUserComment = async (req, res, next) => {
     try {
-        const user = await User.findOne({ _id: req.body.userId })
+        const user = await User.findOne({ email: req.body.userEmail })
         if (user) {
             const user = await User.findOne({ email: req.body.comment.email })
-            await User.updateOne({ _id: req.body.userId }, { $push: { 'comments': { ...req.body.comment, userName: user.userName, profile_pic: user.image?.url, createdAt: new Date() } } })
+            await User.updateOne({ email: req.body.userEmail }, { $push: { 'comments': { ...req.body.comment, userName: user.userName, profile_pic: user.image?.url, createdAt: new Date() } } })
             return res.status(200).json('Comment added')
 
         }
@@ -582,10 +582,10 @@ exports.addUserComment = async (req, res, next) => {
 
 exports.removeUserComment = async (req, res, next) => {
     try {
-        const pitch = await User.findOne({ _id: req.body.userId })
+        const pitch = await User.findOne({ email: req.body.comment.email })
         if (pitch) {
             const commentExist = await User.findOne({ 'comments._id': req.body.commentId })
-            await User.updateOne({ _id: req.body.userId }, { $pull: { 'comments': { _id: req.body.commentId } } })
+            await User.updateOne({ email: req.body.comment.email }, { $pull: { 'comments': { _id: req.body.commentId } } })
             return res.status(200).json('Comment Deleted')
         }
         return res.status(400).json('No User Found')
