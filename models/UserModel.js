@@ -125,7 +125,9 @@ const userSchema = new mongoose.Schema({
         }
 
     }],
-    skills: {type: Array},
+    skills: { type: Array },
+    languagesKnown: { type: Array },
+
     comments: [{
         email: {
             type: String

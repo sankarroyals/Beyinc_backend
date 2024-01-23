@@ -23,6 +23,7 @@ const userApprovalSchema = new mongoose.Schema({
     town: { type: String },
     country: { type: String },
     skills: { type: Array },
+    languagesKnown: { type: Array },
 
     role: {
         type: String
