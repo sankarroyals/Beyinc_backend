@@ -66,6 +66,12 @@ router.route("/editprofile").post(userController.editProfile);
 
 router.route("/getAllRequests").post(userController.getAllUserProfileRequests);
 
+router.route("/addUserReview").post(userController.addUserReviewStars);
+router.route("/getUserReview").post(userController.getUserReviewStars);
+
+router.route("/addUserComment").post(userController.addUserComment);
+router.route("/deleteUserComment").post(userController.removeUserComment);
+
 
 router.route("/updateVerification").post(userController.updateVerification);
 router.route("/updateProfileImage").post(userController.updateProfileImage);

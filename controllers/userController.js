@@ -525,6 +525,71 @@ exports.getAllUserProfileRequests = async (req, res, next) => {
 
 
 
+exports.addUserReviewStars = async (req, res, next) => {
+    try {
+        const user = await User.findOne({ _id: req.body.userId })
+        if (user) {
+            const userExists = await User.findOne({ '_id': req.body.userId, 'review.email': req.body.review.email })
+            if (userExists) {
+                await User.updateOne({ '_id': req.body.userId, 'review.email': req.body.review.email }, { 'review.$.review': req.body.review.review })
+                return res.status(200).json('Review updated')
+            }
+            await User.updateOne({ _id: req.body.userId }, { $push: { 'review': req.body.review } })
+            return res.status(200).json('Review added')
+
+        }
+        return res.status(400).json('No User Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+exports.getUserReviewStars = async (req, res, next) => {
+    try {
+        const user = await User.findOne({ _id: req.body.userId, 'review.email': req.body.email }, { 'review.$': 1 })
+        if (user) {
+            return res.status(200).json(user.review.length > 0 && user.review[0])
+
+        }
+        return res.status(200).json({})
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+
+
+exports.addUserComment = async (req, res, next) => {
+    try {
+        const user = await User.findOne({ _id: req.body.userId })
+        if (user) {
+            const user = await User.findOne({ email: req.body.comment.email })
+            await User.updateOne({ _id: req.body.userId }, { $push: { 'comments': { ...req.body.comment, userName: user.userName, profile_pic: user.image?.url, createdAt: new Date() } } })
+            return res.status(200).json('Comment added')
+
+        }
+        return res.status(400).json('No User Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+exports.removeUserComment = async (req, res, next) => {
+    try {
+        const pitch = await User.findOne({ _id: req.body.userId })
+        if (pitch) {
+            const commentExist = await User.findOne({ 'comments._id': req.body.commentId })
+            await User.updateOne({ _id: req.body.userId }, { $pull: { 'comments': { _id: req.body.commentId } } })
+            return res.status(200).json('Comment Deleted')
+        }
+        return res.status(400).json('No User Found')
+    } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+
+
 
 
 

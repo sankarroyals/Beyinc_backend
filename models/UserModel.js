@@ -112,7 +112,37 @@ const userSchema = new mongoose.Schema({
                 type: String
             }
         }
-    }
+    },
+    review: [{
+        email: {
+            type: String
+        },
+        review: {
+            type: Number
+        },
+        createdAt: {
+            type: Date
+        }
+
+    }],
+    comments: [{
+        email: {
+            type: String
+        },
+        profile_pic: {
+            type: String
+        },
+        userName: {
+            type: String
+        },
+        comment: {
+            type: String
+        },
+        createdAt: {
+            type: Date
+        }
+
+    }],
     
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
