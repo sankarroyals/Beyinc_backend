@@ -8,6 +8,7 @@ const pitchSchema = new mongoose.Schema({
     }, userName: {
         type: String
     },
+    userType: {type: String},
     state: { type: String },
     town: { type: String },
     country: { type: String },
@@ -20,9 +21,10 @@ const pitchSchema = new mongoose.Schema({
     teamOverview: {
         type: String
     },
-    business: {
+    businessModel: {
         type: String
     },
+    revenueModel: { type: String },
     memberscountry: {
         type: String
     },
@@ -39,7 +41,13 @@ const pitchSchema = new mongoose.Schema({
     industry1: {
         type: String
     },
-    market: {
+    targetMarket: {
+        type: String
+    },
+    targetUsers: {
+        type: String
+    },
+    usp: {
         type: String
     },
     minimumInvestment: {
@@ -60,7 +68,7 @@ const pitchSchema = new mongoose.Schema({
     raising: {
         type: String
     },
-    shortSummary: {
+    overViewOfStartup: {
         type: String
     },
     stage: {
