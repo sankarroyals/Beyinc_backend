@@ -169,6 +169,8 @@ exports.updateMessageRequest = async (req, res, next) => {
         if (conversationExists) {
             if (req.body.status == 'rejected') {
                 await Conversation.deleteOne({ _id: req.body.conversationId })
+                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${conversationExists.members[1].email}`, `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`)
+                await Notification.create({ sender: conversationExists.members[1].userName, senderEmail: conversationExists.members[1].email, senderProfile: conversationExists.members[1].profile_pic, receiver: conversationExists.members[0].email, message: `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
                 return res.status(200).send(`Message ${req.body.status}`)
             }
             await Conversation.updateOne({ _id: req.body.conversationId }, { $set: { status: req.body.status } })
