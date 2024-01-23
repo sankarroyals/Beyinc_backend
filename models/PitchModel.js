@@ -70,7 +70,7 @@ const pitchSchema = new mongoose.Schema({
     },
     overViewOfStartup: {
         type: String
-    },
+    }, competitorAnalysis: { type: String },
     stage: {
         type: String
     },
