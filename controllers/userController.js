@@ -56,7 +56,7 @@ exports.getApprovalRequestProfile = async (req, res, next) => {
 
 exports.editProfile = async (req, res, next) => {
     try {
-        const { email, userName, role, phone, documents, experienceDetails, educationdetails, fee, bio, state, town, country } = req.body;
+        const { email, userName, role, phone, documents, experienceDetails, educationdetails, fee, bio, state, town, country, skills } = req.body;
 
         // validating email and password
 
@@ -267,7 +267,7 @@ exports.editProfile = async (req, res, next) => {
             await UserUpdate.updateOne({ email: email }, {
                 $set: {
                     userName, image: userExist?.image?.url, role, phone, state: state, town: town, country: country, experienceDetails: experienceDetails, educationDetails: educationdetails,
-                    fee: fee, bio: bio, verification: 'pending', documents: {
+                    fee: fee, bio: bio, verification: 'pending', skills: skills, documents: {
                 resume: {
                     public_id: resume?.public_id,
                     secure_url: resume?.secure_url
@@ -307,7 +307,7 @@ exports.editProfile = async (req, res, next) => {
         const userExist = await User.findOne({ email: email })
         await UserUpdate.create({
             email: email, role: role, userName: userName, phone: phone, state: state, town: town, country: country, experienceDetails: experienceDetails, educationDetails: educationdetails,
-            fee: fee, bio: bio, image: userExist?.image?.url, verification: 'pending', documents: {
+            fee: fee, bio: bio, image: userExist?.image?.url, verification: 'pending', skills: skills, documents: {
                 resume: {
                     public_id: resume?.public_id,
                     secure_url: resume?.secure_url
@@ -361,13 +361,19 @@ exports.updateVerification = async (req, res, next) => {
             await User.updateOne({ email: email }, {
                 $set: {
                     email: userDoesExist.email, state: userDoesExist.state, town: userDoesExist.town, country: userDoesExist.country,  experienceDetails: userDoesExist.experienceDetails, educationDetails: userDoesExist.educationDetails, bio: userDoesExist.bio,
-                    fee: userDoesExist.fee, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status } })
+                    fee: userDoesExist.fee, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status, skills: userDoesExist.skills
+                }
+            })
+            await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
+            await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'user', read: false })
+
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
-        }
-        await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
-        await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'user', read: false })
+            await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`)
+            await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'user', read: false })
 
+        }
+       
         return res.send({ message: `Profile status is ${status} !` });
 
     } catch (err) {
