@@ -175,9 +175,15 @@ exports.fetchAllPitch = async (req, res, next) => {
 
 exports.changePitchStatus = async (req, res, next) => {
     try {
-        const { pitchId, status } = req.body; 
+        const { pitchId, status, reason } = req.body; 
         const pitch = await Pitch.findOne({_id: pitchId})
         const changedPitch = await Pitch.updateOne({ _id: pitchId }, { $set: { status: status } })
+        if (status == 'rejected') {
+            await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin and added comment: "${reason}"`)
+            await Notification.create({ receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin : "${reason}"`, type: 'pitch', read: false })
+            return res.status(200).json(changedPitch)
+
+        }
         await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`)
         await Notification.create({ receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`, type: 'pitch', read: false })
 
