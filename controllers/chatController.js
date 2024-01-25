@@ -103,7 +103,7 @@ exports.addConversation = async (req, res, next) => {
                 for (let i = 0; i < userExist.educationDetails.length; i++) {
                     colleges.push(userExist.educationDetails[i].college)
                 }
-                pitchDetails = await Pitch.create({ ...form, userColleges: colleges, teamMembers: [...teams], state: userExist.state, country: userExist.country, town: userExist.town, pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
+                pitchDetails = await Pitch.create({ ...form, comments: [], review: [], userColleges: colleges, teamMembers: [...teams], state: userExist.state, country: userExist.country, town: userExist.town, pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
             const senderInfo = await User.findOne({ email: req.body.senderId });
