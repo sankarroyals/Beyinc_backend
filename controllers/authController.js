@@ -211,31 +211,32 @@ exports.mobile_otp = async (req, res, next) => {
     const authToken = process.env.TWILIO_AUTHTOKEN;
     const twilioPhoneNumber = process.env.TWILIO_PHONE;
 
-    // const client = twilio(accountSid, authToken);
-    // client.messages
-    //   .create({
-    //     body: `Your one-time Beyinc verification code: ${otp}`,
-    //     from: twilioPhoneNumber,
-    //     to: phone,
-    //   })
-    //   .then(async (message) => {
-    //     const userFind = await Userverify.findOne({ email: phone });
-    //     const otpToken = await signEmailOTpToken({ otp: otp.toString() });
-    //     if (userFind) {
-    //       await Userverify.updateOne(
-    //         { email: phone },
-    //         { $set: { verifyToken: otpToken } }
-    //       );
-    //     } else {
-    //       await Userverify.create({ email: phone, verifyToken: otpToken });
-    //     }
-    //     res.status(200).send("OTP sent successfully");
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error sending OTP via SMS:", error);
-    //     res.status(500).send("Internal Server Error");
-    //   });
+    const client = twilio(accountSid, authToken);
+    client.messages
+      .create({
+        body: `Your one-time Beyinc verification code: ${otp}`,
+        from: twilioPhoneNumber,
+        to: phone,
+      })
+      .then(async (message) => {
+        const userFind = await Userverify.findOne({ email: phone });
+        const otpToken = await signEmailOTpToken({ otp: otp.toString() });
+        if (userFind) {
+          await Userverify.updateOne(
+            { email: phone },
+            { $set: { verifyToken: otpToken } }
+          );
+        } else {
+          await Userverify.create({ email: phone, verifyToken: otpToken });
+        }
+        res.status(200).send("OTP sent successfully");
+      })
+      .catch((error) => {
+        console.error("Error sending OTP via SMS:", error);
+        res.status(500).send("Internal Server Error");
+      });
   } catch (err) {
+    console.error("Error sending OTP via SMS:", err);
     next(err);
   }
 };
