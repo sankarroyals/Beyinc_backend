@@ -147,7 +147,7 @@ exports.mobile_login = async (req, res, next) => {
     );
 
 
-      return res.send({ accessToken: accessToken, refreshToken: refreshToken });
+      return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken });
     // }
   } catch (err) {
     if (err.isJoi == true) err.status = 422;
