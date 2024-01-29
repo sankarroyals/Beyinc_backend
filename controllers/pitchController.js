@@ -117,7 +117,10 @@ exports.removeFromIntrest = async (req, res, next) => {
         if (pitch) {
             const userExist = await Pitch.findOne({ _id: req.body.pitchId, 'intrest.email': { $in: [req.body.email] } })
             if (userExist) {
+                const user = await User.findOne({ email: req.body.email })
                 await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': { email: req.body.email } } })
+                await send_Notification_mail(pitch.email, pitch.email, `Removed from Intrest !`, `${user.userName} has removed pitch ${pitch.title}(${pitch._id}) from their interest list. Check notification for more info.`)
+                await Notification.create({ sender: user.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${user.userName} has removed ${pitch.title}(${pitch._id}) from their interest list.`, type: 'pitch', read: false })
                 return res.status(200).json('User removed from intrest list')
             }
             return res.status(400).json('user not in the intrest list')
@@ -140,7 +143,10 @@ exports.addReviewStars = async (req, res, next) => {
                 await Pitch.updateOne({ '_id': req.body.pitchId, 'review.email': req.body.review.email }, { 'review.$.review': req.body.review.review})
                 return res.status(200).json('Review updated')
             }
+            const user = await User.findOne({ email: req.body.review.email })
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'review': req.body.review } })
+            await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch. Check notification for more info.`)
+            await Notification.create({ sender: pitch.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
             return res.status(200).json('Review added')
 
         }
@@ -175,9 +181,15 @@ exports.fetchAllPitch = async (req, res, next) => {
 
 exports.changePitchStatus = async (req, res, next) => {
     try {
-        const { pitchId, status } = req.body; 
+        const { pitchId, status, reason } = req.body; 
         const pitch = await Pitch.findOne({_id: pitchId})
         const changedPitch = await Pitch.updateOne({ _id: pitchId }, { $set: { status: status } })
+        if (status == 'rejected') {
+            await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin and added comment: "${reason}"`)
+            await Notification.create({ receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin : "${reason}"`, type: 'pitch', read: false })
+            return res.status(200).json(changedPitch)
+
+        }
         await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`)
         await Notification.create({ receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`, type: 'pitch', read: false })
 

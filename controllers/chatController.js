@@ -103,7 +103,7 @@ exports.addConversation = async (req, res, next) => {
                 for (let i = 0; i < userExist.educationDetails.length; i++) {
                     colleges.push(userExist.educationDetails[i].college)
                 }
-                pitchDetails = await Pitch.create({ ...form, userColleges: colleges, teamMembers: [...teams], state: userExist.state, country: userExist.country, town: userExist.town, pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
+                pitchDetails = await Pitch.create({ ...form, comments: [], review: [], userColleges: colleges, teamMembers: [...teams], state: userExist.state, country: userExist.country, town: userExist.town, pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
             const senderInfo = await User.findOne({ email: req.body.senderId });
@@ -169,11 +169,15 @@ exports.updateMessageRequest = async (req, res, next) => {
         if (conversationExists) {
             if (req.body.status == 'rejected') {
                 await Conversation.deleteOne({ _id: req.body.conversationId })
+                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${conversationExists.members[1].email}`, `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`)
+                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`)
+                await Notification.create({ sender: conversationExists.members[1].userName, senderEmail: conversationExists.members[1].email, senderProfile: conversationExists.members[1].profile_pic, receiver: conversationExists.members[0].email, message: `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
                 return res.status(200).send(`Message ${req.body.status}`)
             }
             await Conversation.updateOne({ _id: req.body.conversationId }, { $set: { status: req.body.status } })
-            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${conversationExists.members[1].email}`, `${conversationExists.members[1].email} has ${req.body.status} your message request.`)
-            await Notification.create({ sender: conversationExists.members[1].userName, senderEmail: conversationExists.members[1].email, senderProfile: conversationExists.members[1].profile_pic, receiver: conversationExists.members[0].email, message: `${conversationExists.members[1].email} has ${req.body.status} your message request.`, type: 'pitch', read: false })
+            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${conversationExists.members[1].email}`, `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`)
+            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`)
+            await Notification.create({ sender: conversationExists.members[1].userName, senderEmail: conversationExists.members[1].email, senderProfile: conversationExists.members[1].profile_pic, receiver: conversationExists.members[0].email, message: `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
             return res.status(200).send(`Message ${req.body.status}`)
         }
         return res.status(400).send('Conversation not found')

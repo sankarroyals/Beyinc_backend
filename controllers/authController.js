@@ -121,8 +121,8 @@ exports.mobile_login = async (req, res, next) => {
     // const validating_email_password = await authSchema.validateAsync(req.body);
 
     // Checking user already exist or not
-    const phoneExist = await User.findOne({ phone: phone });
-    if (!phoneExist) {
+    const userDoesExist = await User.findOne({ phone: phone });
+    if (!userDoesExist) {
       return res.status(404).json({ message: "User not found" });
     }
 
@@ -137,16 +137,17 @@ exports.mobile_login = async (req, res, next) => {
     //     .status(404)
     //     .json({ message: "Phone Number/password is wrong" });
     // } else {
-      const accessToken = await signAccessToken(
-        { email: phoneExist.email, user_id: phoneExist._id },
-        `${phoneExist._id}`
-      );
-      const refreshToken = await signRefreshToken(
-        { email: phoneExist.email, _id: phoneExist._id },
-        `${phoneExist._id}`
-      );
+    const accessToken = await signAccessToken(
+      { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      `${userDoesExist._id}`
+    );
+    const refreshToken = await signRefreshToken(
+      { email: userDoesExist.email, _id: userDoesExist._id },
+      `${userDoesExist._id}`
+    );
 
-      return res.send({ accessToken: accessToken, refreshToken: refreshToken });
+
+      return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken });
     // }
   } catch (err) {
     if (err.isJoi == true) err.status = 422;
@@ -210,31 +211,32 @@ exports.mobile_otp = async (req, res, next) => {
     const authToken = process.env.TWILIO_AUTHTOKEN;
     const twilioPhoneNumber = process.env.TWILIO_PHONE;
 
-    // const client = twilio(accountSid, authToken);
-    // client.messages
-    //   .create({
-    //     body: `Your one-time Beyinc verification code: ${otp}`,
-    //     from: twilioPhoneNumber,
-    //     to: phone,
-    //   })
-    //   .then(async (message) => {
-    //     const userFind = await Userverify.findOne({ email: phone });
-    //     const otpToken = await signEmailOTpToken({ otp: otp.toString() });
-    //     if (userFind) {
-    //       await Userverify.updateOne(
-    //         { email: phone },
-    //         { $set: { verifyToken: otpToken } }
-    //       );
-    //     } else {
-    //       await Userverify.create({ email: phone, verifyToken: otpToken });
-    //     }
-    //     res.status(200).send("OTP sent successfully");
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error sending OTP via SMS:", error);
-    //     res.status(500).send("Internal Server Error");
-    //   });
+    const client = twilio(accountSid, authToken);
+    client.messages
+      .create({
+        body: `Your one-time Beyinc verification code: ${otp}`,
+        from: twilioPhoneNumber,
+        to: phone,
+      })
+      .then(async (message) => {
+        const userFind = await Userverify.findOne({ email: phone });
+        const otpToken = await signEmailOTpToken({ otp: otp.toString() });
+        if (userFind) {
+          await Userverify.updateOne(
+            { email: phone },
+            { $set: { verifyToken: otpToken } }
+          );
+        } else {
+          await Userverify.create({ email: phone, verifyToken: otpToken });
+        }
+        res.status(200).send("OTP sent successfully");
+      })
+      .catch((error) => {
+        console.error("Error sending OTP via SMS:", error);
+        res.status(500).send("Internal Server Error");
+      });
   } catch (err) {
+    console.error("Error sending OTP via SMS:", err);
     next(err);
   }
 };
