@@ -357,7 +357,7 @@ exports.updateVerification = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
-        const adminDetails = await User.find({ email: process.env.ADMIN_EMAIL })
+        const adminDetails = await User.findOne({ email: process.env.ADMIN_EMAIL })
         if (status == 'approved') {
             await User.updateOne({ email: email }, {
                 $set: {

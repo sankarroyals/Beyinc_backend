@@ -184,7 +184,7 @@ exports.changePitchStatus = async (req, res, next) => {
         const { pitchId, status, reason } = req.body; 
         const pitch = await Pitch.findOne({_id: pitchId})
         const changedPitch = await Pitch.updateOne({ _id: pitchId }, { $set: { status: status } })
-        const adminDetails = await User.find({ email: process.env.ADMIN_EMAIL })
+        const adminDetails = await User.findOne({ email: process.env.ADMIN_EMAIL })
 
         if (status == 'rejected') {
             await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin and added comment: "${reason}"`)
