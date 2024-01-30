@@ -357,6 +357,7 @@ exports.updateVerification = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
+        const adminDetails = await User.find({ email: process.env.ADMIN_EMAIL })
         if (status == 'approved') {
             await User.updateOne({ email: email }, {
                 $set: {
@@ -364,14 +365,13 @@ exports.updateVerification = async (req, res, next) => {
                     fee: userDoesExist.fee, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status, skills: userDoesExist.skills, languagesKnown: userDoesExist.languagesKnown
                 }
             })
+            
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
-            await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'user', read: false })
-
+            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails.profile_pic, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'pitch', read: false })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`)
-            await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'user', read: false })
-
+            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails.profile_pic, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
         }
        
         return res.send({ message: `Profile status is ${status} !` });
