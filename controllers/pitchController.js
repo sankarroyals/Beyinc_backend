@@ -188,12 +188,12 @@ exports.changePitchStatus = async (req, res, next) => {
 
         if (status == 'rejected') {
             await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin and added comment: "${reason}"`)
-            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails.profile_pic, receiver: pitch.email,  message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin : "${reason}"`, type: 'pitch', read: false })
+            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: pitch.email,  message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin : "${reason}"`, type: 'pitch', read: false })
             return res.status(200).json(changedPitch)
 
         }
         await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`)
-        await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails.profile_pic, receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`, type: 'pitch', read: false })
+        await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`, type: 'pitch', read: false })
 
         return res.status(200).json(changedPitch)
     } catch (err) {

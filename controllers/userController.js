@@ -367,11 +367,11 @@ exports.updateVerification = async (req, res, next) => {
             })
             
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
-            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails.profile_pic, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'pitch', read: false })
+            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'pitch', read: false })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`)
-            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails.profile_pic, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
+            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
         }
        
         return res.send({ message: `Profile status is ${status} !` });
