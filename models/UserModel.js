@@ -40,7 +40,30 @@ const userSchema = new mongoose.Schema({
     state: { type: String },
     town: { type: String },
     country: { type: String },
-    
+    payment: [{
+        email: {
+            type: String
+        },
+        profile_pic: {
+            type: String
+        },
+        userName: {
+            type: String
+        },
+        role: {
+            type: String
+        },
+        moneyPaid: {
+            type: Number
+        },
+        noOfTimes: {
+            type: Number
+        },
+        createdAt: {
+            type: Date
+        }
+
+    }],    
 
     realCoins: {
         type: String

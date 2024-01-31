@@ -596,6 +596,24 @@ exports.removeUserComment = async (req, res, next) => {
 }
 
 
+exports.addPayment = async (req, res, next) => {
+    try {
+        const paymentExist = await User.findOne({ 'payment.email': req.body.senderEmail })
+        if (paymentExist) {
+            await User.updateOne({ email: req.body.email, 'payment.email': req.body.senderEmail }, { $inc: { 'payment.$.moneyPaid': +req.body.money, 'payment.$.noOfTimes': 1 } })
+            return res.status(200).json('Payment Added')
+        }
+        const userExist = User.findOne({ email: req.body.senderEmail })
+        await User.updateOne({ email: req.body.email }, { $push: { payment: { email: req.body.senderEmail, profile_pic: userExist?.image?.url, role: userExist?.role, moneyPaid: req.body.money, noOfTimes: 1, createdAt: new Date()}}})
+        return res.status(200).json('Payment added')
+
+    } catch (err) {
+        console.log(err)
+        return res.status(400).json(err)
+    }
+}
+
+
 
 
 
