@@ -243,26 +243,39 @@ exports.mobile_otp = async (req, res, next) => {
 
 exports.forgot_password = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, type, phone } = req.body;
 
     // validating email and password
-    const validating_email_password = await authSchema.validateAsync(req.body);
+    // const validating_email_password = await authSchema.validateAsync(req.body);
     const salt = await bcrypt.genSalt(10);
     const passwordHashing = await bcrypt.hash(
-      validating_email_password.password,
+      password,
       salt
     );
-
-    const userDoesExist = await User.findOne({ email: email });
-    if (!userDoesExist) {
-      return res.status(404).json({ message: "User not found" });
+    if (type == 'email') {
+      const userDoesExist = await User.findOne({ email: email });
+      if (!userDoesExist) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      await User.updateOne(
+        { email: email },
+        { $set: { password: passwordHashing } }
+      );
+      // await User.save()
+      return res.status(200).json({ message: "Password changed successfully" });
+    } else if (type == 'mobile') {
+      const userDoesExist = await User.findOne({ phone: phone });
+      if (!userDoesExist) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      await User.updateOne(
+        { phone: phone },
+        { $set: { password: passwordHashing } }
+      );
+      // await User.save()
+      return res.status(200).json({ message: "Password changed successfully" });
     }
-    await User.updateOne(
-      { email: email },
-      { $set: { password: passwordHashing } }
-    );
-    // await User.save()
-    return res.status(200).json({ message: "Password changed successfully" });
+    
   } catch (err) {
     next(err);
   }
@@ -324,6 +337,7 @@ exports.verify_otp = async (req, res, next) => {
     const EmailToken = await Userverify.findOne({ email: email });
     if (EmailToken) {
       const { otp } = await verifyEmailOtpToken(EmailToken.verifyToken);
+      console.log(otp, req.body.otp)
       if (req.body.otp == otp) {
         return res.status(200).json({ message: "OTP is Success" });
       } else {
@@ -333,7 +347,7 @@ exports.verify_otp = async (req, res, next) => {
       return res.status(404).json({ message: "Please request a Otp" });
     }
   } catch (err) {
-    return res.status(404).json({ message: "Entered OTP is wrong" });
+    return res.status(404).json({ message: err });
   }
 };
 
