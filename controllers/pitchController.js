@@ -99,7 +99,7 @@ exports.addIntrest = async (req, res, next) => {
             }
             const user = await User.findOne({email: req.body.email})
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': { email: req.body.email, intrestBy: user._id, createdAt: new Date()} } })
-            await send_Notification_mail(pitch.email, pitch.email, `Added new Intrest !`, `${user.userName} has added pitch ${pitch.title}(${pitch._id}) into their interest list. Check notification for more info.`)
+            await send_Notification_mail(pitch.email, pitch.email, `Added new Interest !`, `${user.userName} has added pitch ${pitch.title}(${pitch._id}) into their interest list. Check notification for more info.`)
             await Notification.create({ senderInfo: user._id,  receiver: pitch.email, message: `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list.`, type: 'pitch', read: false })
             return res.status(200).json('Intrest added')
 
@@ -119,7 +119,7 @@ exports.removeFromIntrest = async (req, res, next) => {
             if (userExist) {
                 const user = await User.findOne({ email: req.body.email })
                 await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': { email: req.body.email } } })
-                await send_Notification_mail(pitch.email, pitch.email, `Removed from Intrest !`, `${user.userName} has removed pitch ${pitch.title}(${pitch._id}) from their interest list. Check notification for more info.`)
+                await send_Notification_mail(pitch.email, pitch.email, `Removed from Interest !`, `${user.userName} has removed pitch ${pitch.title}(${pitch._id}) from their interest list. Check notification for more info.`)
                 await Notification.create({ senderInfo: user._id, receiver: pitch.email, message: `${user.userName} has removed ${pitch.title}(${pitch._id}) from their interest list.`, type: 'pitch', read: false })
                 return res.status(200).json('User removed from intrest list')
             }
