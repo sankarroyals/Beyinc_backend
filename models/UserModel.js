@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema({
             type: Date
         }
 
-    }],    
+    }],
 
     realCoins: {
         type: String
@@ -88,7 +88,7 @@ const userSchema = new mongoose.Schema({
         type: String
     },
     documents: {
-       
+
         resume: {
             public_id: {
                 type: String
@@ -97,8 +97,8 @@ const userSchema = new mongoose.Schema({
                 type: String
             }
         },
-       
-        
+
+
         acheivements: {
             public_id: {
                 type: String
@@ -107,7 +107,7 @@ const userSchema = new mongoose.Schema({
                 type: String
             }
         },
-        
+
         degree: {
             public_id: {
                 type: String
@@ -116,7 +116,7 @@ const userSchema = new mongoose.Schema({
                 type: String
             }
         },
-        
+
         expertise: {
             public_id: {
                 type: String
@@ -124,9 +124,9 @@ const userSchema = new mongoose.Schema({
             secure_url: {
                 type: String
             }
-            
+
         },
-       
+
         working: {
             public_id: {
                 type: String
@@ -137,6 +137,10 @@ const userSchema = new mongoose.Schema({
         }
     },
     review: [{
+        reviewBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         },
@@ -152,15 +156,19 @@ const userSchema = new mongoose.Schema({
     languagesKnown: { type: Array },
 
     comments: [{
+        commentBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         },
-        profile_pic: {
-            type: String
-        },
-        userName: {
-            type: String
-        },
+        // profile_pic: {
+        //     type: String
+        // },
+        // userName: {
+        //     type: String
+        // },
         comment: {
             type: String
         },
@@ -169,10 +177,10 @@ const userSchema = new mongoose.Schema({
         }
 
     }],
-    
+
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
 })
 
 const User = new mongoose.model('User', userSchema)
-module.exports =  User;
+module.exports = User;

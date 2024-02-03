@@ -22,11 +22,11 @@ const send_Notification_mail = require("../helpers/EmailSending");
 exports.getProfile = async (req, res, next) => {
     try {
         const { email } = req.body
-        const userDoesExist = await User.findOne({ email: email });
-        const removePass = { ...userDoesExist._doc, password: '' }
+        const userDoesExist = await User.findOne({ email: email }, { projection: { password: 0 } }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] });
+        
         // console.log(removePass);
         if (userDoesExist) {
-            return res.status(200).json(removePass)
+            return res.status(200).json(userDoesExist)
         }
     }
     catch (error) {
@@ -367,11 +367,11 @@ exports.updateVerification = async (req, res, next) => {
             })
             
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
-            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'pitch', read: false })
+            await Notification.create({ senderInfo: adminDetails._id,   receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'pitch', read: false })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`)
-            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
+            await Notification.create({ senderInfo: adminDetails._id,  receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
         }
        
         return res.send({ message: `Profile status is ${status} !` });
@@ -540,7 +540,8 @@ exports.addUserReviewStars = async (req, res, next) => {
                 await User.updateOne({ '_id': req.body.userId, 'review.email': req.body.review.email }, { 'review.$.review': req.body.review.review })
                 return res.status(200).json('Review updated')
             }
-            await User.updateOne({ _id: req.body.userId }, { $push: { 'review': req.body.review } })
+            const reviewUser = await User.findOne({ email: req.body.review.email })
+            await User.updateOne({ _id: req.body.userId }, { $push: { 'review': req.body.review, 'reviewBy': reviewUser._id} })
             return res.status(200).json('Review added')
 
         }
@@ -552,7 +553,8 @@ exports.addUserReviewStars = async (req, res, next) => {
 
 exports.getUserReviewStars = async (req, res, next) => {
     try {
-        const user = await User.findOne({ email: req.body.userEmail, 'review.email': req.body.email }, { 'review.$': 1 })
+        const user = await User.findOne({ email: req.body.userEmail, 'review.email': req.body.email }, { 'review.$': 1 }).populate({ path: 'review.reviewBy', select: ['email','userName', 'image', 'role'] })
+
         if (user) {
             return res.status(200).json(user.review.length > 0 && user.review[0])
 
@@ -568,9 +570,10 @@ exports.getUserReviewStars = async (req, res, next) => {
 exports.addUserComment = async (req, res, next) => {
     try {
         const user = await User.findOne({ email: req.body.userEmail })
+        const commentUser = await User.findOne({ email: req.body.comment.email })
         if (user) {
             const user = await User.findOne({ email: req.body.comment.email })
-            await User.updateOne({ email: req.body.userEmail }, { $push: { 'comments': { ...req.body.comment, userName: user.userName, profile_pic: user.image?.url, createdAt: new Date() } } })
+            await User.updateOne({ email: req.body.userEmail }, { $push: { 'comments': { ...req.body.comment, commentBy: commentUser._id, createdAt: new Date() } } })
             return res.status(200).json('Comment added')
 
         }

@@ -14,7 +14,7 @@ exports.fetchPendingPitch = async (req, res, next) => {
 
 exports.fetchSinglePitch = async (req, res, next) => {
     try {
-        const pendingPitches = await Pitch.findOne({_id: req.body.pitchId})
+        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] });
         return res.status(200).json(pendingPitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -53,7 +53,7 @@ exports.fetchUserPitches = async (req, res, next) => {
 
 exports.fetchLivePitch = async (req, res, next) => {
     try {
-        const livePitches = await Pitch.find({ status: 'approved', pitchRequiredStatus: 'show' })
+        const livePitches = await Pitch.find({ status: 'approved', pitchRequiredStatus: 'show' }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role', 'state', 'town', 'country'] })
         return res.status(200).json(livePitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -65,7 +65,7 @@ exports.addPitchComment = async (req, res, next) => {
         const pitch = await Pitch.findOne({ _id: req.body.pitchId })
         if (pitch) {
             const user = await User.findOne({ email: req.body.comment.email })
-            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'comments': { ...req.body.comment, userName: user.userName, profile_pic: user.image?.url, createdAt: new Date()} }  })
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'comments': { ...req.body.comment, commentBy: user._id, createdAt: new Date()} }  })
             return res.status(200).json('Comment added')
 
         }
@@ -98,9 +98,9 @@ exports.addIntrest = async (req, res, next) => {
                 return res.status(400).json('user already in the intrest list')
             }
             const user = await User.findOne({email: req.body.email})
-            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': {email:req.body.email, profile_pic: user.image?.url, userName: user.userName} } })
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'intrest': { email: req.body.email, intrestBy: user._id, createdAt: new Date()} } })
             await send_Notification_mail(pitch.email, pitch.email, `Added new Intrest !`, `${user.userName} has added pitch ${pitch.title}(${pitch._id}) into their interest list. Check notification for more info.`)
-            await Notification.create({ sender: user.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list.`, type: 'pitch', read: false })
+            await Notification.create({ senderInfo: user._id,  receiver: pitch.email, message: `${user.userName} has added ${pitch.title}(${pitch._id}) into their interest list.`, type: 'pitch', read: false })
             return res.status(200).json('Intrest added')
 
         }
@@ -120,7 +120,7 @@ exports.removeFromIntrest = async (req, res, next) => {
                 const user = await User.findOne({ email: req.body.email })
                 await Pitch.updateOne({ _id: req.body.pitchId }, { $pull: { 'intrest': { email: req.body.email } } })
                 await send_Notification_mail(pitch.email, pitch.email, `Removed from Intrest !`, `${user.userName} has removed pitch ${pitch.title}(${pitch._id}) from their interest list. Check notification for more info.`)
-                await Notification.create({ sender: user.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${user.userName} has removed ${pitch.title}(${pitch._id}) from their interest list.`, type: 'pitch', read: false })
+                await Notification.create({ senderInfo: user._id, receiver: pitch.email, message: `${user.userName} has removed ${pitch.title}(${pitch._id}) from their interest list.`, type: 'pitch', read: false })
                 return res.status(200).json('User removed from intrest list')
             }
             return res.status(400).json('user not in the intrest list')
@@ -144,9 +144,9 @@ exports.addReviewStars = async (req, res, next) => {
                 return res.status(200).json('Review updated')
             }
             const user = await User.findOne({ email: req.body.review.email })
-            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'review': req.body.review } })
+            await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'review': { ...req.body.review, 'reviewBy': user._id }} })
             await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch. Check notification for more info.`)
-            await Notification.create({ sender: pitch.userName, senderEmail: user.email, senderProfile: user.image?.url, receiver: pitch.email, message: `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
+            await Notification.create({ senderInfo: user._id,  receiver: pitch.email, message: `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
             return res.status(200).json('Review added')
 
         }
@@ -158,7 +158,7 @@ exports.addReviewStars = async (req, res, next) => {
 
 exports.getReviewStars = async (req, res, next) => {
     try {
-        const pitch = await Pitch.findOne({ _id: req.body.pitchId, 'review.email': req.body.email }, { 'review.$': 1 })
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId, 'review.email': req.body.email }, { 'review.$': 1 }).populate({ path: 'review.reviewBy', select: ['email', 'userName', 'image', 'role'] })
         if (pitch) {
             return res.status(200).json(pitch.review.length > 0 && pitch.review[0])
 
@@ -172,7 +172,7 @@ exports.getReviewStars = async (req, res, next) => {
 
 exports.fetchAllPitch = async (req, res, next) => {
     try {
-        const AllPitches = await Pitch.find()
+        const AllPitches = await Pitch.find().populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role', 'state', 'town', 'country'] })
         return res.status(200).json(AllPitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -188,12 +188,12 @@ exports.changePitchStatus = async (req, res, next) => {
 
         if (status == 'rejected') {
             await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin and added comment: "${reason}"`)
-            await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: pitch.email,  message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin : "${reason}"`, type: 'pitch', read: false })
+            await Notification.create({ senderInfo: adminDetails._id,  receiver: pitch.email,  message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin : "${reason}"`, type: 'pitch', read: false })
             return res.status(200).json(changedPitch)
 
         }
         await send_Notification_mail(pitch.email, pitch.email, `Pitch status update !`, `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`)
-        await Notification.create({ sender: adminDetails.userName, senderEmail: adminDetails.email, senderProfile: adminDetails?.image?.url, receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`, type: 'pitch', read: false })
+        await Notification.create({ senderInfo: adminDetails._id, receiver: pitch.email, message: `For pitch ${pitch.title}(${pitch._id}) status has been updated to ${req.body.status} by the admin`, type: 'pitch', read: false })
 
         return res.status(200).json(changedPitch)
     } catch (err) {

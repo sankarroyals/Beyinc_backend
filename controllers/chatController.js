@@ -103,7 +103,7 @@ exports.addConversation = async (req, res, next) => {
                 for (let i = 0; i < userExist.educationDetails.length; i++) {
                     colleges.push(userExist.educationDetails[i].college)
                 }
-                pitchDetails = await Pitch.create({ ...form, comments: [], review: [], userColleges: colleges, teamMembers: [...teams], state: userExist.state, country: userExist.country, town: userExist.town, pitchRequiredStatus: pitchRequiredStatus, email: email, profile_pic: userExist.image?.url, userName: userExist.userName, role: role, tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
+                pitchDetails = await Pitch.create({ ...form, userInfo: userExist._id, comments: [], review: [],  teamMembers: [...teams],  pitchRequiredStatus: pitchRequiredStatus, email: email,  tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
             }
 
             const senderInfo = await User.findOne({ email: req.body.senderId });
@@ -111,9 +111,9 @@ exports.addConversation = async (req, res, next) => {
             // adding conversation after pitch done
             await Conversation.create({
                 members: [{
-                    email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role,
+                    email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role, user: senderInfo._id,
                 }, {
-                    email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role,
+                    email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role, user: receiverInfo._id,
                 }], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
             })
             await send_Notification_mail(senderInfo.email, receiverInfo.email, `Message Request from ${senderInfo.email}`, `${senderInfo.email} sent a message request please check the notification section.`)
@@ -133,7 +133,7 @@ exports.addConversation = async (req, res, next) => {
 // Admin can create direct conversation
 exports.directConversationCreation = async (req, res, next) => {
     try {
-       
+
         const conversationExists = await Conversation.find({
             'members.email': { $all: [req.body.senderId, req.body.receiverId] }
         })
@@ -143,9 +143,9 @@ exports.directConversationCreation = async (req, res, next) => {
             const receiverInfo = await User.findOne({ email: req.body.receiverId });
             await Conversation.create({
                 members: [{
-                    email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role
+                    email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role, user: senderInfo._id
                 }, {
-                    email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role
+                    email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role, user: receiverInfo._id
                 }], requestedTo: req.body.receiverId, status: req.body.status,
             })
             return res.status(200).send(`Conversation with ${req.body.receiverId} created`)
@@ -167,17 +167,18 @@ exports.updateMessageRequest = async (req, res, next) => {
             _id: req.body.conversationId
         })
         if (conversationExists) {
+            const UserExist = await User.findOne({ email: conversationExists.members[1].email })
             if (req.body.status == 'rejected') {
                 await Conversation.deleteOne({ _id: req.body.conversationId })
                 await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${conversationExists.members[1].email}`, `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`)
                 await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`)
-                await Notification.create({ sender: conversationExists.members[1].userName, senderEmail: conversationExists.members[1].email, senderProfile: conversationExists.members[1].profile_pic, receiver: conversationExists.members[0].email, message: `${conversationExists.members[1].userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
+                await Notification.create({ senderInfo: UserExist._id,  receiver: conversationExists.members[0].email, message: `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
                 return res.status(200).send(`Message ${req.body.status}`)
             }
             await Conversation.updateOne({ _id: req.body.conversationId }, { $set: { status: req.body.status } })
             await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${conversationExists.members[1].email}`, `${conversationExists.members[1].email} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`)
             await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`)
-            await Notification.create({ sender: conversationExists.members[1].userName, senderEmail: conversationExists.members[1].email, senderProfile: conversationExists.members[1].profile_pic, receiver: conversationExists.members[0].email, message: `${conversationExists.members[1].userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
+            await Notification.create({ senderInfo: UserExist._id,  receiver: conversationExists.members[0].email, message: `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
             return res.status(200).send(`Message ${req.body.status}`)
         }
         return res.status(400).send('Conversation not found')
@@ -192,7 +193,7 @@ exports.fetchRequest = async (req, res, next) => {
     try {
         const conversationExists = await Conversation.find({
             requestedTo: req.body.email, status: 'pending'
-        })
+        }).populate({ path: 'members.user', select: ['email','userName', 'image', 'role'] })
         return res.status(200).send(conversationExists)
 
     }
@@ -206,6 +207,8 @@ exports.findUserConversation = async (req, res, next) => {
         const conversationExists = await Conversation.find({
             'members.email': { $in: [req.body.email] }
         })
+            .populate({ path: 'members.user', select: ['email','userName', 'image', 'role']})
+        // .populate('members.user')
         if (conversationExists) {
             return res.status(200).json(conversationExists)
         }
@@ -283,8 +286,8 @@ exports.getMessage = async (req, res, next) => {
 exports.getFrienddetailsByConversationId = async (req, res, next) => {
     try {
         const { conversationId, email } = req.body
-        const result = await Conversation.findOne({ _id: conversationId })
-        const friendMail = await result.members.filter(f=>f.email!==email)[0]
+        const result = await Conversation.findOne({ _id: conversationId }).populate({ path: 'members.user', select: ['email','userName', 'image', 'role'] })
+        const friendMail = await result.members.filter(f => f.email !== email)[0]
         return res.status(200).send(friendMail)
     }
     catch (error) {
