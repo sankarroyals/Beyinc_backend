@@ -13,6 +13,9 @@ const MessageSchema = new mongoose.Schema({
     message: {
         type: String
     },
+    seen: {
+        type: Date
+    },
     file: {
         
         public_id: {

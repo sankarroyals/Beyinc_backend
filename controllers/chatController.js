@@ -255,6 +255,25 @@ exports.addMessage = async (req, res, next) => {
 }
 
 
+exports.changeSeenStatus = async (req, res, next) => {
+    try {
+        const { senderId, receiverId } = req.body;
+        const MessageExists = await Message.find({ senderId: senderId, receiverId: receiverId  }).sort({ _id: -1 }).limit(1)
+        console.log(MessageExists);
+        console.log(MessageExists[0].seen);
+        if (MessageExists[0] && MessageExists[0].seen==undefined) {
+            await Message.updateOne({ _id: MessageExists[0]._id }, { seen: new Date() })
+            return res.status(200).send('Message is seen')
+        }
+        return res.status(200).send('Message Already seen')
+
+
+    }
+    catch (error) {
+        return res.status(400).send(error)
+    }
+}
+
 exports.deleteMessage = async (req, res, next) => {
     try {
         const { messageId } = req.body
