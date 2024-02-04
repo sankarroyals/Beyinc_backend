@@ -154,7 +154,31 @@ const userSchema = new mongoose.Schema({
     }],
     skills: { type: Array },
     languagesKnown: { type: Array },
+    chatBlock: [{
+        userInfo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        email: {
+            type: String
+        },
+        createdAt: {
+            type: Date
+        }
 
+    }],
+    chatBlockedBy: [{
+        userInfo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        email: {
+            type: String
+        },
+        createdAt: {
+            type: Date
+        }
+    }],
     comments: [{
         commentBy: {
             type: mongoose.Schema.Types.ObjectId,

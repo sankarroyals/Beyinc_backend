@@ -274,6 +274,8 @@ exports.changeSeenStatus = async (req, res, next) => {
     }
 }
 
+
+
 exports.deleteMessage = async (req, res, next) => {
     try {
         const { messageId } = req.body
