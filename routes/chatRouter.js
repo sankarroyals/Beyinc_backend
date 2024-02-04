@@ -2,10 +2,13 @@ const express = require("express");
 const router = express.Router();
 const chatController = require("../controllers/chatController");
 
+router.route("/blockUserschat").post(chatController.chatBlock);
 
 router.route("/addConversation").post(chatController.addConversation);
 router.route("/directConversationCreation").post(chatController.directConversationCreation);
 router.route("/getConversation").post(chatController.findUserConversation);
+router.route("/getConversationById").post(chatController.findConversationById);
+
 router.route("/changeChatSeen").post(chatController.changeSeenStatus);
 
 router.route("/deleteConversation").post(chatController.deleteUserConversation);

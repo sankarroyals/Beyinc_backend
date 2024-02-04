@@ -382,34 +382,36 @@ exports.updateVerification = async (req, res, next) => {
     }
 }
 
+// IT MAY USE FOR USER BLOCK
+// exports.chatBlock = async (req, res, next) => {
+//     try {
+//         const { email, blockEmail } = req.body;
+//         // Checking user already exist or not
+//         const mainUser = await User.findOne({ email: email, 'chatBlock.email': { $in: [blockEmail] } })
+//         const blockingUser = await User.findOne({ email: blockEmail, 'chatBlockedBy.email': { $in: [email]} })
+//         if (mainUser) {
+//             await User.updateOne({ email: email}, { $pull: { 'chatBlock': {email: blockEmail} } })
+//             if (blockingUser) {
+//                 await User.updateOne({ email: blockEmail }, { $pull: { 'chatBlockedBy': { email: email } } })
+//             }
+//             return res.status(200).send({ message: `Unblocked the user` });
+//         } else {
+//             const blockingUser = await User.findOne({ email: blockEmail })
+//             const mainUserDetails = await User.findOne({ email: email })
+//             await User.updateOne({ email: email }, { $push: { 'chatBlock': { userInfo: blockingUser._id, email: blockEmail } } })
+//             await User.updateOne({ email: blockEmail }, { $push: { 'chatBlockedBy': { userInfo: mainUserDetails._id, email: email } }  })
+//             return res.status(200).send({ message: `blocked the user` });
+//         }
 
-exports.chatBlock = async (req, res, next) => {
-    try {
-        const { email, blockEmail } = req.body;
-        // Checking user already exist or not
-        const mainUser = await User.findOne({ email: email, 'chatBlock.email': { $in: [blockEmail] } })
-        const blockingUser = await User.findOne({ email: blockEmail, 'chatBlockedBy.email': { $in: [email]} })
-        if (mainUser) {
-            await User.updateOne({ email: email}, { $pull: { 'chatBlock': {email: blockEmail} } })
-            if (blockingUser) {
-                await User.updateOne({ email: blockEmail }, { $pull: { 'chatBlockedBy': { email: email } } })
-            }
-            return res.status(200).send({ message: `Unblocked the user` });
-        } else {
-            const blockingUser = await User.findOne({ email: blockEmail })
-            const mainUserDetails = await User.findOne({ email: email })
-            await User.updateOne({ email: email }, { $push: { 'chatBlock': { userInfo: blockingUser._id, email: blockEmail } } })
-            await User.updateOne({ email: blockEmail }, { $push: { 'chatBlockedBy': { userInfo: mainUserDetails._id, email: email } }  })
-            return res.status(200).send({ message: `blocked the user` });
-        }
+
+//     } catch (err) {
+//         console.log(err);
+//         return res.status(400).send({ message: `Error in Profile updation !` });
+
+//     }
+// }
 
 
-    } catch (err) {
-        console.log(err);
-        return res.status(400).send({ message: `Error in Profile updation !` });
-
-    }
-}
 
 
 exports.verifyUserPassword = async (req, res, next) => {

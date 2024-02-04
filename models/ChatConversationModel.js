@@ -27,6 +27,15 @@ const conversationSchema = new mongoose.Schema({
     }, 
     pitchId: {
         type: String
+    },
+    chatBlocked: {
+        userInfo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        blockedBy: {
+            type: String
+        }
     }
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields

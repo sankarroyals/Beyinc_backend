@@ -65,7 +65,6 @@ router.route("/verifyUserPassword").post(userController.verifyUserPassword);
 router.route("/editprofile").post(userController.editProfile);
 
 router.route("/getAllRequests").post(userController.getAllUserProfileRequests);
-router.route("/blockUserschat").post(userController.chatBlock);
 
 router.route("/addUserReview").post(userController.addUserReviewStars);
 router.route("/getUserReview").post(userController.getUserReviewStars);

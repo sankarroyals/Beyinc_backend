@@ -220,6 +220,23 @@ exports.findUserConversation = async (req, res, next) => {
     }
 }
 
+exports.findConversationById = async (req, res, next) => {
+    try {
+        const conversationExists = await Conversation.findOne({
+            _id: req.body.conversationId
+        })
+            .populate({ path: 'members.user', select: ['email', 'userName', 'image', 'role'] })
+        // .populate('members.user')
+        if (conversationExists) {
+            return res.status(200).json(conversationExists)
+        }
+        return res.status(400).send('No Conversation found')
+
+    }
+    catch (error) {
+        return res.status(400).send(error)
+    }
+}
 
 exports.deleteUserConversation = async (req, res, next) => {
     try {
@@ -317,4 +334,22 @@ exports.getFrienddetailsByConversationId = async (req, res, next) => {
 }
 
 
+
+
+exports.chatBlock = async (req, res, next) => {
+    try {
+        const { conversationId, blockedBy } = req.body
+        const user = await User.findOne({ email: blockedBy })
+        const conversation = await Conversation.findOne({ _id: conversationId, 'chatBlocked.blockedBy': blockedBy})
+        if (conversation) {
+            await Conversation.updateOne({ _id: conversationId }, {'chatBlocked': {}})
+            return res.status(200).send('Chat Unblocked')
+        } 
+        await Conversation.updateOne({ _id: conversationId }, { 'chatBlocked': {userInfo: user._id, blockedBy: blockedBy} })
+        return res.status(200).send('Chat blocked')
+
+    } catch (err) {
+        return res.status(400).send(error)
+    }
+}
 
