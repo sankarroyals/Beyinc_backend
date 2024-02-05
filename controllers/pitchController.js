@@ -14,7 +14,7 @@ exports.fetchPendingPitch = async (req, res, next) => {
 
 exports.fetchSinglePitch = async (req, res, next) => {
     try {
-        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });;
+        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });
         return res.status(200).json(pendingPitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -41,7 +41,7 @@ exports.updateSinglePitch = async (req, res, next) => {
 exports.fetchUserPitches = async (req, res, next) => {
     try {
         const { email } = req.body;
-        const result = await Pitch.find({ email: email })
+        const result = await Pitch.find({ email: email }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });
         return res.status(200).json(result)
     } catch (err) {
         return res.status(400).json(err)
