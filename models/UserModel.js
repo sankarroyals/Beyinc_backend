@@ -40,7 +40,30 @@ const userSchema = new mongoose.Schema({
     state: { type: String },
     town: { type: String },
     country: { type: String },
-    
+    payment: [{
+        email: {
+            type: String
+        },
+        profile_pic: {
+            type: String
+        },
+        userName: {
+            type: String
+        },
+        role: {
+            type: String
+        },
+        moneyPaid: {
+            type: Number
+        },
+        noOfTimes: {
+            type: Number
+        },
+        createdAt: {
+            type: Date
+        }
+
+    }],
 
     realCoins: {
         type: String
@@ -65,7 +88,7 @@ const userSchema = new mongoose.Schema({
         type: String
     },
     documents: {
-       
+
         resume: {
             public_id: {
                 type: String
@@ -74,8 +97,8 @@ const userSchema = new mongoose.Schema({
                 type: String
             }
         },
-       
-        
+
+
         acheivements: {
             public_id: {
                 type: String
@@ -84,7 +107,7 @@ const userSchema = new mongoose.Schema({
                 type: String
             }
         },
-        
+
         degree: {
             public_id: {
                 type: String
@@ -93,7 +116,7 @@ const userSchema = new mongoose.Schema({
                 type: String
             }
         },
-        
+
         expertise: {
             public_id: {
                 type: String
@@ -101,9 +124,9 @@ const userSchema = new mongoose.Schema({
             secure_url: {
                 type: String
             }
-            
+
         },
-       
+
         working: {
             public_id: {
                 type: String
@@ -114,6 +137,10 @@ const userSchema = new mongoose.Schema({
         }
     },
     review: [{
+        reviewBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         },
@@ -127,17 +154,45 @@ const userSchema = new mongoose.Schema({
     }],
     skills: { type: Array },
     languagesKnown: { type: Array },
-
-    comments: [{
+    chatBlock: [{
+        userInfo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         },
-        profile_pic: {
+        createdAt: {
+            type: Date
+        }
+
+    }],
+    chatBlockedBy: [{
+        userInfo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        email: {
             type: String
         },
-        userName: {
+        createdAt: {
+            type: Date
+        }
+    }],
+    comments: [{
+        commentBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        email: {
             type: String
         },
+        // profile_pic: {
+        //     type: String
+        // },
+        // userName: {
+        //     type: String
+        // },
         comment: {
             type: String
         },
@@ -146,10 +201,10 @@ const userSchema = new mongoose.Schema({
         }
 
     }],
-    
+
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
 })
 
 const User = new mongoose.model('User', userSchema)
-module.exports =  User;
+module.exports = User;

@@ -2,18 +2,22 @@ const mongoose = require('mongoose');
 
 const conversationSchema = new mongoose.Schema({
     members: [{
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         }, 
-        userName: {
-            type: String
-        },
-        profile_pic: {
-            type: String
-        },
-        role: {
-            type: String
-        }
+        // userName: {
+        //     type: String
+        // },
+        // profile_pic: {
+        //     type: String
+        // },
+        // role: {
+        //     type: String
+        // }
     }],
     status: {
         type: String
@@ -23,6 +27,15 @@ const conversationSchema = new mongoose.Schema({
     }, 
     pitchId: {
         type: String
+    },
+    chatBlocked: {
+        userInfo: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        blockedBy: {
+            type: String
+        }
     }
 }, {
     timestamps: true  // This adds 'createdAt' and 'updatedAt' fields

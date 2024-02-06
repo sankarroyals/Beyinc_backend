@@ -3,18 +3,22 @@ const mongoose = require('mongoose');
 const pitchSchema = new mongoose.Schema({
     email: {
         type: String
-    }, profile_pic: {
-        type: String
-    }, userName: {
-        type: String
+    }, userInfo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
+    // profile_pic: {
+    //     type: String
+    // }, userName: {
+    //     type: String
+    // },
     userType: {type: String},
-    state: { type: String },
-    town: { type: String },
-    country: { type: String },
-    role: {
-        type: String
-    },
+    // state: { type: String },
+    // town: { type: String },
+    // country: { type: String },
+    // role: {
+    //     type: String
+    // },
     website: {
         type: String
     },
@@ -34,7 +38,7 @@ const pitchSchema = new mongoose.Schema({
     industry2: {
         type: String
     },
-    userColleges: {type: Array},
+    // userColleges: {type: Array},
     idealInvestor: {
         type: String
     },
@@ -149,15 +153,19 @@ const pitchSchema = new mongoose.Schema({
         }
     }],
     comments: [{
+        commentBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         }, 
-        profile_pic: {
-            type: String
-        },
-        userName: {
-            type: String
-        },
+        // profile_pic: {
+        //     type: String
+        // },
+        // userName: {
+        //     type: String
+        // },
         comment: {
             type: String
         },
@@ -167,20 +175,28 @@ const pitchSchema = new mongoose.Schema({
 
     }],
     intrest: [{
+        intrestBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         },
-        userName: {
-            type: String
-        }, profile_pic: {
-            type: String
-        },
+        // userName: {
+        //     type: String
+        // }, profile_pic: {
+        //     type: String
+        // },
         createdAt: {
             type: Date
         }
 
     }],
     review: [{
+        reviewBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         email: {
             type: String
         },

@@ -3,7 +3,7 @@ const Notification = require("../models/NotificationModel")
 exports.fetchNotifications = async (req, res, next) => {
     try {
         const { email } = req.body
-        const noti = await Notification.find({ receiver: email }).sort({ createdAt: -1 })
+        const noti = await Notification.find({ receiver: email }).sort({ createdAt: -1 }).populate({ path: 'senderInfo', select: ['email','userName', 'image', 'role'] })
         return res.status(200).json(noti)
         
     } catch (err) {

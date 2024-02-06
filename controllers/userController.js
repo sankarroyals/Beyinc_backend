@@ -22,11 +22,11 @@ const send_Notification_mail = require("../helpers/EmailSending");
 exports.getProfile = async (req, res, next) => {
     try {
         const { email } = req.body
-        const userDoesExist = await User.findOne({ email: email });
-        const removePass = { ...userDoesExist._doc, password: '' }
+        const userDoesExist = await User.findOne({ email: email }, { projection: { password: 0 } }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] });
+        
         // console.log(removePass);
         if (userDoesExist) {
-            return res.status(200).json(removePass)
+            return res.status(200).json(userDoesExist)
         }
     }
     catch (error) {
@@ -357,6 +357,7 @@ exports.updateVerification = async (req, res, next) => {
             return res.status(404).json({ message: "User not found" });
         }
         await UserUpdate.updateOne({ email: email }, { $set: { verification: status } })
+        const adminDetails = await User.findOne({ email: process.env.ADMIN_EMAIL })
         if (status == 'approved') {
             await User.updateOne({ email: email }, {
                 $set: {
@@ -364,14 +365,13 @@ exports.updateVerification = async (req, res, next) => {
                     fee: userDoesExist.fee, documents: userDoesExist.documents, role: userDoesExist.role, userName: userDoesExist.userName, phone: userDoesExist.phone, verification: status, skills: userDoesExist.skills, languagesKnown: userDoesExist.languagesKnown
                 }
             })
+            
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
-            await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'user', read: false })
-
+            await Notification.create({ senderInfo: adminDetails._id,   receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'pitch', read: false })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
             await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`)
-            await Notification.create({ receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'user', read: false })
-
+            await Notification.create({ senderInfo: adminDetails._id,  receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
         }
        
         return res.send({ message: `Profile status is ${status} !` });
@@ -381,6 +381,38 @@ exports.updateVerification = async (req, res, next) => {
 
     }
 }
+
+// IT MAY USE FOR USER BLOCK
+// exports.chatBlock = async (req, res, next) => {
+//     try {
+//         const { email, blockEmail } = req.body;
+//         // Checking user already exist or not
+//         const mainUser = await User.findOne({ email: email, 'chatBlock.email': { $in: [blockEmail] } })
+//         const blockingUser = await User.findOne({ email: blockEmail, 'chatBlockedBy.email': { $in: [email]} })
+//         if (mainUser) {
+//             await User.updateOne({ email: email}, { $pull: { 'chatBlock': {email: blockEmail} } })
+//             if (blockingUser) {
+//                 await User.updateOne({ email: blockEmail }, { $pull: { 'chatBlockedBy': { email: email } } })
+//             }
+//             return res.status(200).send({ message: `Unblocked the user` });
+//         } else {
+//             const blockingUser = await User.findOne({ email: blockEmail })
+//             const mainUserDetails = await User.findOne({ email: email })
+//             await User.updateOne({ email: email }, { $push: { 'chatBlock': { userInfo: blockingUser._id, email: blockEmail } } })
+//             await User.updateOne({ email: blockEmail }, { $push: { 'chatBlockedBy': { userInfo: mainUserDetails._id, email: email } }  })
+//             return res.status(200).send({ message: `blocked the user` });
+//         }
+
+
+//     } catch (err) {
+//         console.log(err);
+//         return res.status(400).send({ message: `Error in Profile updation !` });
+
+//     }
+// }
+
+
+
 
 exports.verifyUserPassword = async (req, res, next) => {
     try {
@@ -540,7 +572,8 @@ exports.addUserReviewStars = async (req, res, next) => {
                 await User.updateOne({ '_id': req.body.userId, 'review.email': req.body.review.email }, { 'review.$.review': req.body.review.review })
                 return res.status(200).json('Review updated')
             }
-            await User.updateOne({ _id: req.body.userId }, { $push: { 'review': req.body.review } })
+            const reviewUser = await User.findOne({ email: req.body.review.email })
+            await User.updateOne({ _id: req.body.userId }, { $push: { 'review': req.body.review, 'reviewBy': reviewUser._id} })
             return res.status(200).json('Review added')
 
         }
@@ -552,7 +585,8 @@ exports.addUserReviewStars = async (req, res, next) => {
 
 exports.getUserReviewStars = async (req, res, next) => {
     try {
-        const user = await User.findOne({ email: req.body.userEmail, 'review.email': req.body.email }, { 'review.$': 1 })
+        const user = await User.findOne({ email: req.body.userEmail, 'review.email': req.body.email }, { 'review.$': 1 }).populate({ path: 'review.reviewBy', select: ['email','userName', 'image', 'role'] })
+
         if (user) {
             return res.status(200).json(user.review.length > 0 && user.review[0])
 
@@ -568,9 +602,10 @@ exports.getUserReviewStars = async (req, res, next) => {
 exports.addUserComment = async (req, res, next) => {
     try {
         const user = await User.findOne({ email: req.body.userEmail })
+        const commentUser = await User.findOne({ email: req.body.comment.email })
         if (user) {
             const user = await User.findOne({ email: req.body.comment.email })
-            await User.updateOne({ email: req.body.userEmail }, { $push: { 'comments': { ...req.body.comment, userName: user.userName, profile_pic: user.image?.url, createdAt: new Date() } } })
+            await User.updateOne({ email: req.body.userEmail }, { $push: { 'comments': { ...req.body.comment, commentBy: commentUser._id, createdAt: new Date() } } })
             return res.status(200).json('Comment added')
 
         }
@@ -582,14 +617,33 @@ exports.addUserComment = async (req, res, next) => {
 
 exports.removeUserComment = async (req, res, next) => {
     try {
-        const pitch = await User.findOne({ email: req.body.comment.email })
+        const pitch = await User.findOne({ email: req.body.email })
         if (pitch) {
             const commentExist = await User.findOne({ 'comments._id': req.body.commentId })
-            await User.updateOne({ email: req.body.comment.email }, { $pull: { 'comments': { _id: req.body.commentId } } })
+            await User.updateOne({ email: req.body.email }, { $pull: { 'comments': { _id: req.body.commentId } } })
             return res.status(200).json('Comment Deleted')
         }
         return res.status(400).json('No User Found')
     } catch (err) {
+        console.log(err)
+        return res.status(400).json(err)
+    }
+}
+
+
+exports.addPayment = async (req, res, next) => {
+    try {
+        const paymentExist = await User.findOne({ 'payment.email': req.body.senderEmail })
+        if (paymentExist) {
+            await User.updateOne({ email: req.body.email, 'payment.email': req.body.senderEmail }, { $inc: { 'payment.$.moneyPaid': +req.body.money, 'payment.$.noOfTimes': 1 } })
+            return res.status(200).json('Payment Added')
+        }
+        const userExist = User.findOne({ email: req.body.senderEmail })
+        await User.updateOne({ email: req.body.email }, { $push: { payment: { email: req.body.senderEmail, profile_pic: userExist?.image?.url, role: userExist?.role, moneyPaid: req.body.money, noOfTimes: 1, createdAt: new Date()}}})
+        return res.status(200).json('Payment added')
+
+    } catch (err) {
+        console.log(err)
         return res.status(400).json(err)
     }
 }
