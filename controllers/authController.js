@@ -15,6 +15,7 @@ const dotenv = require("dotenv");
 const Userverify = require("../models/OtpModel");
 dotenv.config({ path: "../config.env" });
 const twilio = require("twilio");
+const { exist } = require("@hapi/joi");
 
 exports.register = async (req, res, next) => {
   try {
@@ -206,6 +207,11 @@ exports.verifyMainAccessToken = async (req, res, next) => {
 exports.mobile_otp = async (req, res, next) => {
   try {
     const { phone } = req.body;
+    const phoneexist = await User.findOne({phone: phone.slice(3,)});
+    console.log(phone.slice(3,))
+if(phoneexist){
+  return res.status(400).json("Phone number already exists");
+}
     const otp = Math.floor(100000 + Math.random() * 900000);
     const accountSid = process.env.TWILIO_ACCOUNTSID;
     const authToken = process.env.TWILIO_AUTHTOKEN;
@@ -233,7 +239,7 @@ exports.mobile_otp = async (req, res, next) => {
       })
       .catch((error) => {
         console.error("Error sending OTP via SMS:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error sending OTP via SMS");
       });
   } catch (err) {
     console.error("Error sending OTP via SMS:", err);
