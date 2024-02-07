@@ -239,7 +239,7 @@ if(phoneexist){
       })
       .catch((error) => {
         console.error("Error sending OTP via SMS:", error);
-        res.status(500).send("Internal Server Error");
+        res.status(500).send("Error sending OTP via SMS");
       });
   } catch (err) {
     console.error("Error sending OTP via SMS:", err);
