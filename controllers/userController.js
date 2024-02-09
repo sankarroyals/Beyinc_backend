@@ -266,6 +266,7 @@ exports.editProfile = async (req, res, next) => {
 
             await UserUpdate.updateOne({ email: email }, {
                 $set: {
+                    userInfo:userExist._id,
                     userName, image: userExist?.image?.url, role, phone, state: state, town: town, country: country, experienceDetails: experienceDetails, educationDetails: educationdetails,
                     fee: fee, bio: bio, verification: 'pending', skills: skills, languagesKnown: languagesKnown, documents: {
                 resume: {
@@ -305,7 +306,8 @@ exports.editProfile = async (req, res, next) => {
         }
 
         const userExist = await User.findOne({ email: email })
-        await UserUpdate.create({
+        await UserUpdate.create({ 
+            userInfo:userExist._id,
             email: email, role: role, userName: userName, phone: phone, state: state, town: town, country: country, experienceDetails: experienceDetails, educationDetails: educationdetails,
             fee: fee, bio: bio, image: userExist?.image?.url, verification: 'pending', skills: skills, languagesKnown: languagesKnown, documents: {
                 resume: {
@@ -366,17 +368,18 @@ exports.updateVerification = async (req, res, next) => {
                 }
             })
             
-            await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin`)
-            await Notification.create({ senderInfo: adminDetails._id,   receiver: email, message: `Your profile update request has been ${req.body.status} by the admin`, type: 'pitch', read: false })
+            await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been <b>${req.body.status}</b> by the admin` , userDoesExist.userName)
+            await Notification.create({ senderInfo: adminDetails._id,   receiver: email, message: `Your profile update request has been <b>${req.body.status}</b> by the admin.`, type: 'pitch', read: false })
         } else {
             await User.updateOne({ email: email }, { $set: { verification: status } })
-            await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`)
-            await Notification.create({ senderInfo: adminDetails._id,  receiver: email, message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
+            await send_Notification_mail(email, email, `Profile Update`, `Your profile update request has been <b>${req.body.status}</b> by the admin and added comment: "<b>${req.body.reason}</b>"`, userDoesExist.userName)
+            await Notification.create({ senderInfo: adminDetails._id,  receiver: email, message: `Your profile update request has been <b>${req.body.status}</b> by the admin and added comment: "${req.body.reason}"`, type: 'pitch', read: false })
         }
        
         return res.send({ message: `Profile status is ${status} !` });
 
     } catch (err) {
+        console.log(err)
         return res.status(400).send({ message: `Error in Profile updation !` });
 
     }
@@ -552,7 +555,7 @@ exports.getUsers = async (req, res, next) => {
 exports.getAllUserProfileRequests = async (req, res, next) => {
     try {
         const {filters} = req.body
-        const result = await UserUpdate.find()
+        const result = await UserUpdate.find().populate({ path: 'userInfo', select: ['email','userName', 'image', 'role'] })
         return res.status(200).json(result)
         
 

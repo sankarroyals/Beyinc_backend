@@ -49,15 +49,19 @@ exports.register = async (req, res, next) => {
     }
 
     if (ErrorMessages.length > 0) {
-      return res.status(404).json({ message: ErrorMessages.join(',')+'Already exists' });
+      return res
+        .status(404)
+        .json({ message: ErrorMessages.join(",") + "Already exists" });
     }
     await User.create({
       email,
       password: passwordHashing,
       phone,
       role,
-      userName, freeCoins: '100', realCoins: '0',
-      verification: 'initial'
+      userName,
+      freeCoins: "100",
+      realCoins: "0",
+      verification: "initial",
     });
     const userDetails = await User.findOne({ email: email });
 
@@ -76,7 +80,6 @@ exports.register = async (req, res, next) => {
     next(err);
   }
 };
-
 
 exports.login = async (req, res, next) => {
   try {
@@ -100,7 +103,17 @@ exports.login = async (req, res, next) => {
       return res.status(404).json({ message: "Email/password is wrong" });
     } else {
       const accessToken = await signAccessToken(
-        { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+        {
+          email: userDoesExist.email,
+          freeCoins: userDoesExist.freeCoins,
+          realCoins: userDoesExist.realCoins,
+          documents: userDoesExist.documents,
+          user_id: userDoesExist._id,
+          role: userDoesExist.role,
+          userName: userDoesExist.userName,
+          image: userDoesExist.image?.url,
+          verification: userDoesExist.verification,
+        },
         `${userDoesExist._id}`
       );
       const refreshToken = await signRefreshToken(
@@ -139,7 +152,17 @@ exports.mobile_login = async (req, res, next) => {
     //     .json({ message: "Phone Number/password is wrong" });
     // } else {
     const accessToken = await signAccessToken(
-      { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      {
+        email: userDoesExist.email,
+        freeCoins: userDoesExist.freeCoins,
+        realCoins: userDoesExist.realCoins,
+        documents: userDoesExist.documents,
+        user_id: userDoesExist._id,
+        role: userDoesExist.role,
+        userName: userDoesExist.userName,
+        image: userDoesExist.image?.url,
+        verification: userDoesExist.verification,
+      },
       `${userDoesExist._id}`
     );
     const refreshToken = await signRefreshToken(
@@ -147,8 +170,9 @@ exports.mobile_login = async (req, res, next) => {
       `${userDoesExist._id}`
     );
 
-
-      return res.status(200).send({ accessToken: accessToken, refreshToken: refreshToken });
+    return res
+      .status(200)
+      .send({ accessToken: accessToken, refreshToken: refreshToken });
     // }
   } catch (err) {
     if (err.isJoi == true) err.status = 422;
@@ -165,7 +189,17 @@ exports.refreshToken = async (req, res, next) => {
     const { user_id, email } = await verifyRefreshToken(refreshToken);
     const userDoesExist = await User.findOne({ email: email });
     const accessToken = await signAccessToken(
-      { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents , user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      {
+        email: userDoesExist.email,
+        freeCoins: userDoesExist.freeCoins,
+        realCoins: userDoesExist.realCoins,
+        documents: userDoesExist.documents,
+        user_id: userDoesExist._id,
+        role: userDoesExist.role,
+        userName: userDoesExist.userName,
+        image: userDoesExist.image?.url,
+        verification: userDoesExist.verification,
+      },
       `${user_id}`
     );
     const refreshtoken = await signRefreshToken(
@@ -176,7 +210,6 @@ exports.refreshToken = async (req, res, next) => {
     return res.send({ accessToken: accessToken, refreshToken: refreshtoken });
   } catch (err) {
     return res.status(400).json(err);
-
   }
 };
 
@@ -187,31 +220,42 @@ exports.verifyMainAccessToken = async (req, res, next) => {
       return res.status(400).json({ message: "Bad request" });
     }
     const { email } = await verifyAPiAccessToken(accessToken);
-    const userDoesExist = await User.findOne({email: email})
+    const userDoesExist = await User.findOne({ email: email });
     const currentaccessToken = await signAccessToken(
-      { email: userDoesExist.email, freeCoins: userDoesExist.freeCoins, realCoins: userDoesExist.realCoins, documents: userDoesExist.documents, user_id: userDoesExist._id, role: userDoesExist.role, userName: userDoesExist.userName, image: userDoesExist.image?.url, verification: userDoesExist.verification },
+      {
+        email: userDoesExist.email,
+        freeCoins: userDoesExist.freeCoins,
+        realCoins: userDoesExist.realCoins,
+        documents: userDoesExist.documents,
+        user_id: userDoesExist._id,
+        role: userDoesExist.role,
+        userName: userDoesExist.userName,
+        image: userDoesExist.image?.url,
+        verification: userDoesExist.verification,
+      },
       `${userDoesExist._id}`
     );
     const refreshToken = await signRefreshToken(
       { email: userDoesExist.email, _id: userDoesExist._id },
       `${userDoesExist._id}`
     );
-    return res.send({ accessToken: currentaccessToken, refreshToken: refreshToken });
+    return res.send({
+      accessToken: currentaccessToken,
+      refreshToken: refreshToken,
+    });
   } catch (err) {
     return res.status(400).json(err);
-
   }
 };
-
 
 exports.mobile_otp = async (req, res, next) => {
   try {
     const { phone } = req.body;
-    const phoneexist = await User.findOne({phone: phone.slice(3,)});
-    console.log(phone.slice(3,))
-if(phoneexist){
-  return res.status(400).json("Phone number already exists");
-}
+    const phoneexist = await User.findOne({ phone: phone.slice(3) });
+    console.log(phone.slice(3));
+    if (phoneexist) {
+      return res.status(400).json("Phone number already exists");
+    }
     const otp = Math.floor(100000 + Math.random() * 900000);
     const accountSid = process.env.TWILIO_ACCOUNTSID;
     const authToken = process.env.TWILIO_AUTHTOKEN;
@@ -254,11 +298,8 @@ exports.forgot_password = async (req, res, next) => {
     // validating email and password
     // const validating_email_password = await authSchema.validateAsync(req.body);
     const salt = await bcrypt.genSalt(10);
-    const passwordHashing = await bcrypt.hash(
-      password,
-      salt
-    );
-    if (type == 'email') {
+    const passwordHashing = await bcrypt.hash(password, salt);
+    if (type == "email") {
       const userDoesExist = await User.findOne({ email: email });
       if (!userDoesExist) {
         return res.status(404).json({ message: "User not found" });
@@ -269,7 +310,7 @@ exports.forgot_password = async (req, res, next) => {
       );
       // await User.save()
       return res.status(200).json({ message: "Password changed successfully" });
-    } else if (type == 'mobile') {
+    } else if (type == "mobile") {
       const userDoesExist = await User.findOne({ phone: phone });
       if (!userDoesExist) {
         return res.status(404).json({ message: "User not found" });
@@ -281,7 +322,6 @@ exports.forgot_password = async (req, res, next) => {
       // await User.save()
       return res.status(200).json({ message: "Password changed successfully" });
     }
-    
   } catch (err) {
     next(err);
   }
@@ -305,12 +345,21 @@ exports.send_otp_mail = async (req, res, next) => {
       to: to,
       subject: subject,
       html: `
-        <div style="font-family: 'Arial', sans-serif; padding: 20px; text-align: center; background-color: #f4f4f4;">
-        <p style="font-size: 16px; color: #333; margin-bottom: 20px;">Your one-time Beyinc verification code: <span stle="color: blue">${otp.toString()}</span></p>
-        <img src="https://beyinc.net/wp-content/uploads/2023/08/WhatsApp_Image_2023-08-02_at_11.23.51_PM__2_-removebg-preview.png" alt="Embedded Image" style="width: 100%; max-width: 400px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-        <p style="font-size: 14px; color: #777; margin-top: 20px;">Thanks and Regards,</p>
-        <p style="font-size: 16px; color: #555; font-weight: bold;">Beyinc</p>
+        <div style="max-width: 600px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-top: 4px solid #6a73fa; border-bottom: 4px solid #6a73fa;">
+        <img src="https://github.com/ShivaShankarGoddumarri/User-Images/assets/96565316/4dc1cd87-df3a-4aa8-81ff-5eb6c54d370a" alt="Email Banner" style="display: block; margin: 0 auto 20px; max-width: 40%; height: auto;">
+        <p>Hi,</p>
+        <p>Your one-time password for <b>BEYINC SIGNUP</b> is <b>${otp.toString()}</b> valid for the next 5 minutes. For safety reasons, <b>PLEASE DO NOT SHARE YOUR OTP</b> with anyone. </p>
+        <div style="margin: 0 auto; background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-top: 20px; text-align: center; width: 150px;">
+          <p style="font-size: 24px; margin: 0;">${otp.toString()}</p>
+          <a href = ${
+            process.env.BEYINC_SITE
+          } style="display: inline-block; padding: 10px 20px; background-color: #6a73fa; color: #fff; text-decoration: none; border-radius: 5px;">Go to BeyInc</a>       
         </div>
+         <p style="margin-top: 20px;">Best Regards,<br><b>BeyInc</b></p>
+        <div style="margin-top: 20px; background-color: #f0f0f0; padding: 10px; border-radius: 5px; text-align: center;">
+            <p style="margin: 0;">&copy; Copyright BeyInc</p>
+          </div>
+      </div>
        `,
     };
 
@@ -343,7 +392,7 @@ exports.verify_otp = async (req, res, next) => {
     const EmailToken = await Userverify.findOne({ email: email });
     if (EmailToken) {
       const { otp } = await verifyEmailOtpToken(EmailToken.verifyToken);
-      console.log(otp, req.body.otp)
+      console.log(otp, req.body.otp);
       if (req.body.otp == otp) {
         return res.status(200).json({ message: "OTP is Success" });
       } else {
@@ -356,5 +405,3 @@ exports.verify_otp = async (req, res, next) => {
     return res.status(404).json({ message: err });
   }
 };
-
-

@@ -6,6 +6,10 @@ const userApprovalSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    userInfo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     email: {
         type: String,
         required: true,
