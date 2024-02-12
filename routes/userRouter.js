@@ -55,10 +55,10 @@ const userController = require("../controllers/userController");
  */
 
 router.route("/getUser").post(userController.getProfile);
-router.route("/getApprovalRequestProfile").post(userController.getApprovalRequestProfile);
+router
+  .route("/getApprovalRequestProfile")
+  .post(userController.getApprovalRequestProfile);
 
-
- 
 router.route("/getUsers").post(userController.getUsers);
 
 router.route("/verifyUserPassword").post(userController.verifyUserPassword);
@@ -72,13 +72,12 @@ router.route("/getUserReview").post(userController.getUserReviewStars);
 router.route("/addUserComment").post(userController.addUserComment);
 router.route("/deleteUserComment").post(userController.removeUserComment);
 
-
 router.route("/updateVerification").post(userController.updateVerification);
 router.route("/updateProfileImage").post(userController.updateProfileImage);
 router.route("/deleteProfileImage").post(userController.deleteProfileImage);
 
-
 router.route("/addPayment").post(userController.addPayment);
 
+router.route("/likeComment").patch(userController.likeComment);
 
 module.exports = router;
