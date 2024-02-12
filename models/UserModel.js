@@ -1,191 +1,207 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
+const userSchema = new mongoose.Schema(
+  {
     userName: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
     },
     email: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
     },
     phone: {
-        type: String,
-        required: true,
-        unique: true
+      type: String,
+      required: true,
+      unique: true,
     },
     password: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
     },
     image: {
-        public_id: {
-            type: String
-        },
-        url: {
-            type: String
-        }
+      public_id: {
+        type: String,
+      },
+      url: {
+        type: String,
+      },
     },
     role: {
-        type: String
+      type: String,
     },
     verification: {
-        type: String
+      type: String,
     },
     freeCoins: {
-        type: String
+      type: String,
     },
     state: { type: String },
     town: { type: String },
     country: { type: String },
-    payment: [{
+    payment: [
+      {
         email: {
-            type: String
+          type: String,
         },
         profile_pic: {
-            type: String
+          type: String,
         },
         userName: {
-            type: String
+          type: String,
         },
         role: {
-            type: String
+          type: String,
         },
         moneyPaid: {
-            type: Number
+          type: Number,
         },
         noOfTimes: {
-            type: Number
+          type: Number,
         },
         createdAt: {
-            type: Date
-        }
-
-    }],
+          type: Date,
+        },
+      },
+    ],
 
     realCoins: {
-        type: String
-    }, experienceDetails: [{
+      type: String,
+    },
+    experienceDetails: [
+      {
         domain: { type: String },
         start: { type: String },
         end: { type: String },
         year: { type: String },
         company: { type: String },
         profession: { type: String },
-    }],
-    educationDetails: [{
+      },
+    ],
+    educationDetails: [
+      {
         Edstart: { type: String },
         Edend: { type: String },
         year: { type: String },
         grade: { type: String },
         college: { type: String },
-    }],
+      },
+    ],
     fee: {
-        type: String
-    }, bio: {
-        type: String
+      type: String,
+    },
+    bio: {
+      type: String,
     },
     documents: {
-
-        resume: {
-            public_id: {
-                type: String
-            },
-            secure_url: {
-                type: String
-            }
+      resume: {
+        public_id: {
+          type: String,
         },
-
-
-        acheivements: {
-            public_id: {
-                type: String
-            },
-            secure_url: {
-                type: String
-            }
+        secure_url: {
+          type: String,
         },
+      },
 
-        degree: {
-            public_id: {
-                type: String
-            },
-            secure_url: {
-                type: String
-            }
+      acheivements: {
+        public_id: {
+          type: String,
         },
-
-        expertise: {
-            public_id: {
-                type: String
-            },
-            secure_url: {
-                type: String
-            }
-
+        secure_url: {
+          type: String,
         },
+      },
 
-        working: {
-            public_id: {
-                type: String
-            },
-            secure_url: {
-                type: String
-            }
-        }
+      degree: {
+        public_id: {
+          type: String,
+        },
+        secure_url: {
+          type: String,
+        },
+      },
+
+      expertise: {
+        public_id: {
+          type: String,
+        },
+        secure_url: {
+          type: String,
+        },
+      },
+
+      working: {
+        public_id: {
+          type: String,
+        },
+        secure_url: {
+          type: String,
+        },
+      },
     },
-    review: [{
+    review: [
+      {
         reviewBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
         },
         email: {
-            type: String
+          type: String,
         },
         review: {
-            type: Number
+          type: Number,
         },
         createdAt: {
-            type: Date
-        }
-
-    }],
+          type: Date,
+        },
+      },
+    ],
     skills: { type: Array },
     languagesKnown: { type: Array },
-    chatBlock: [{
+    chatBlock: [
+      {
         userInfo: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
         },
         email: {
-            type: String
+          type: String,
         },
         createdAt: {
-            type: Date
-        }
-
-    }],
-    chatBlockedBy: [{
+          type: Date,
+        },
+      },
+    ],
+    chatBlockedBy: [
+      {
         userInfo: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
         },
         email: {
-            type: String
+          type: String,
         },
         createdAt: {
-            type: Date
-        }
-    }],
-    comments: [{
+          type: Date,
+        },
+      },
+    ],
+    comments: [
+      {
         commentBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
         },
+        likes: [
+          {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+          },
+        ],
         email: {
-            type: String
+          type: String,
         },
         // profile_pic: {
         //     type: String
@@ -194,17 +210,18 @@ const userSchema = new mongoose.Schema({
         //     type: String
         // },
         comment: {
-            type: String
+          type: String,
         },
         createdAt: {
-            type: Date
-        }
+          type: Date,
+        },
+      },
+    ],
+  },
+  {
+    timestamps: true, // This adds 'createdAt' and 'updatedAt' fields
+  }
+);
 
-    }],
-
-}, {
-    timestamps: true  // This adds 'createdAt' and 'updatedAt' fields
-})
-
-const User = new mongoose.model('User', userSchema)
+const User = new mongoose.model("User", userSchema);
 module.exports = User;
