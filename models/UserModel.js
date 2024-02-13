@@ -188,35 +188,6 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    comments: [
-      {
-        commentBy: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-        },
-        likes: [
-          {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-          },
-        ],
-        email: {
-          type: String,
-        },
-        // profile_pic: {
-        //     type: String
-        // },
-        // userName: {
-        //     type: String
-        // },
-        comment: {
-          type: String,
-        },
-        createdAt: {
-          type: Date,
-        },
-      },
-    ],
   },
   {
     timestamps: true, // This adds 'createdAt' and 'updatedAt' fields

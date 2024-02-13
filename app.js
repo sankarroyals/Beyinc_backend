@@ -1,8 +1,12 @@
 const express = require("express");
 const authRouter = require('./routes/authRouter')
 const userRouter = require('./routes/userRouter')
+const userCommentRouter = require('./routes/userCommentsRouter')
+
 const chatRouter = require('./routes/chatRouter')
 const pitchRouter = require('./routes/pitchRouter')
+const pitchCommentRouter = require('./routes/PitchCommentRouter')
+
 const NotificationRouter = require('./routes/NotificationRouter')
 
 const rolerouter = require('./routes/rolesRouter')
@@ -30,6 +34,10 @@ app.use("/api/userDetails",
     verifyAccessToken,
     userRouter);
 
+app.use("/api/userDetails",
+    verifyAccessToken,
+    userCommentRouter);
+
 app.use("/api/chat",
     verifyAccessToken,
     chatRouter);
@@ -37,6 +45,10 @@ app.use("/api/chat",
 app.use("/api/pitch",
     verifyAccessToken,
     pitchRouter);
+
+app.use("/api/pitch",
+    verifyAccessToken,
+    pitchCommentRouter);
 
 app.use("/api/notification",
     verifyAccessToken,

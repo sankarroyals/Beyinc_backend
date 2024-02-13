@@ -69,7 +69,7 @@ router.route("/getAllRequests").post(userController.getAllUserProfileRequests);
 router.route("/addUserReview").post(userController.addUserReviewStars);
 router.route("/getUserReview").post(userController.getUserReviewStars);
 
-router.route("/addUserComment").post(userController.addUserComment);
+// router.route("/addUserComment").post(userController.addUserComment);
 router.route("/deleteUserComment").post(userController.removeUserComment);
 
 router.route("/updateVerification").post(userController.updateVerification);
@@ -78,6 +78,6 @@ router.route("/deleteProfileImage").post(userController.deleteProfileImage);
 
 router.route("/addPayment").post(userController.addPayment);
 
-router.route("/likeComment").patch(userController.likeComment);
+
 
 module.exports = router;

@@ -24,10 +24,7 @@ exports.getProfile = async (req, res, next) => {
     const userDoesExist = await User.findOne(
       { email: email },
       { projection: { password: 0 } }
-    ).populate({
-      path: "comments.commentBy",
-      select: ["email", "userName", "image", "role"],
-    });
+    )
 
     // console.log(removePass);
     if (userDoesExist) {
@@ -863,21 +860,3 @@ exports.addPayment = async (req, res, next) => {
   }
 };
 
-exports.likeComment = async (req, res, next) => {
-  try {
-    const commentOwner = await User.findById(req.body.comment_owner);
-    const comment = commentOwner.comments.filter(
-      (v) => v._id == req.body.comment_id
-    )[0];
-    if (comment.likes?.includes(req.payload.user_id)) {
-      comment.likes = comment.likes.filter((v) => v != req.payload.user_id);
-    } else {
-      comment.likes.push(req.payload.user_id);
-    }
-    commentOwner.save();
-    return res.status(200).json("comment liked");
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json(err);
-  }
-};

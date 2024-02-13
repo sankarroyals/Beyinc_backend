@@ -14,7 +14,7 @@ exports.fetchPendingPitch = async (req, res, next) => {
 
 exports.fetchSinglePitch = async (req, res, next) => {
     try {
-        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'comments.subComments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });
+        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId })
         return res.status(200).json(pendingPitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -227,3 +227,6 @@ exports.recentPitchOfUser = async (req, res, next) => {
         return res.status(400).json(err)
     }
 }
+
+
+
