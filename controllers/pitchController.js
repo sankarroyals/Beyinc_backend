@@ -80,7 +80,7 @@ exports.addPitchSubComment = async (req, res, next) => {
         const pitch = await Pitch.findOne({ _id: req.body.pitchId, 'comments._id': req.body.commentId  })
         if (pitch) {
             const user = await User.findOne({ email: req.body.email })
-            await Pitch.updateOne({ _id: req.body.pitchId, 'comments._id': req.body.commentId }, { $push: { 'comments.$.subComments': { ...req.body.comment, commentBy: user._id, createdAt: new Date() } } })
+            await Pitch.updateOne({ _id: req.body.pitchId, 'comments._id': req.body.commentId }, { $push: { 'comments.$.subComments': { comment: req.body.comment, commentBy: user._id, createdAt: new Date() } } })
             return res.status(200).json('Comment added')
 
         }
