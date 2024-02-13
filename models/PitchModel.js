@@ -160,12 +160,18 @@ const pitchSchema = new mongoose.Schema({
         email: {
             type: String
         }, 
-        // profile_pic: {
-        //     type: String
-        // },
-        // userName: {
-        //     type: String
-        // },
+        subComments: [{
+            commentBy: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
+            comment: {
+                type: String
+            },
+            createdAt: {
+                type: Date
+            }
+        }],
         comment: {
             type: String
         },

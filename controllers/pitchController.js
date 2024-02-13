@@ -14,7 +14,7 @@ exports.fetchPendingPitch = async (req, res, next) => {
 
 exports.fetchSinglePitch = async (req, res, next) => {
     try {
-        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });
+        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'comments.subComments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });
         return res.status(200).json(pendingPitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -71,6 +71,22 @@ exports.addPitchComment = async (req, res, next) => {
         }
         return res.status(400).json('No Pitch Found')
     } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+exports.addPitchSubComment = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId, 'comments._id': req.body.commentId  })
+        if (pitch) {
+            const user = await User.findOne({ email: req.body.email })
+            await Pitch.updateOne({ _id: req.body.pitchId, 'comments._id': req.body.commentId }, { $push: { 'comments.$.subComments': { ...req.body.comment, commentBy: user._id, createdAt: new Date() } } })
+            return res.status(200).json('Comment added')
+
+        }
+        return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        console.log(err);
         return res.status(400).json(err)
     }
 }
