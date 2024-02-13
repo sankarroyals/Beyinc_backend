@@ -44,9 +44,6 @@ exports.getPitchComment = async (req, res, next) => {
             select: ["email", "userName", "image", "role"],
         }).populate({
             path: "subComments",
-            select: ["commentBy", "likes", "Dislikes", "comment", "subComments"],
-        }).populate({
-            path: "subComments",
             populate: {
                 path: "commentBy",
                 select: ["email", "userName", "image", "role"],
