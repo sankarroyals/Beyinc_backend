@@ -17,7 +17,6 @@ const UserUpdate = require("../models/UpdateApproval");
 const cloudinary = require("../helpers/UploadImage");
 const Notification = require("../models/NotificationModel");
 const send_Notification_mail = require("../helpers/EmailSending");
-const UserComment = require("../models/UserCommentModel");
 const PitchComment = require("../models/PitchCommentModel");
 
 exports.addPitchComment = async (req, res, next) => {
@@ -59,7 +58,7 @@ exports.getPitchComment = async (req, res, next) => {
 
 exports.likePitchComment = async (req, res, next) => {
     try {
-        const comment = await UserComment.findById(req.body.comment_id);
+        const comment = await PitchComment.findById(req.body.comment_id);
 
         if (comment.likes?.includes(req.payload.user_id)) {
             comment.likes = comment.likes.filter((v) => v != req.payload.user_id);
@@ -80,7 +79,7 @@ exports.likePitchComment = async (req, res, next) => {
 
 exports.DispitchlikelikeComment = async (req, res, next) => {
     try {
-        const comment = await UserComment.findById(req.body.comment_id);
+        const comment = await PitchComment.findById(req.body.comment_id);
 
         if (comment.Dislikes?.includes(req.payload.user_id)) {
             comment.Dislikes = comment.Dislikes.filter((v) => v != req.payload.user_id);
@@ -92,7 +91,7 @@ exports.DispitchlikelikeComment = async (req, res, next) => {
             comment.likes = comment.likes.filter((v) => v != req.payload.user_id);
         }
         comment.save();
-        return res.status(200).json("comment liked");
+        return res.status(200).json("comment Disliked");
     } catch (err) {
         console.log(err);
         return res.status(400).json(err);

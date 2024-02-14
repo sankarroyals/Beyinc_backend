@@ -80,7 +80,7 @@ exports.DislikelikeComment = async (req, res, next) => {
             comment.likes = comment.likes.filter((v) => v != req.payload.user_id);
         }
         comment.save();
-        return res.status(200).json("comment liked");
+        return res.status(200).json("comment Disliked");
     } catch (err) {
         console.log(err);
         return res.status(400).json(err);
