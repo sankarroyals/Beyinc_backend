@@ -497,7 +497,7 @@ exports.updateVerification = async (req, res, next) => {
       await Notification.create({
         senderInfo: adminDetails._id,
         receiver: email,
-        message: `Your profile update request has been <b>${req.body.status}</b> by the admin.`,
+        message: `Your profile update request has been ${req.body.status} by the admin.`,
         type: "pitch",
         read: false,
       });
