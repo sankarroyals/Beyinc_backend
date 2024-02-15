@@ -119,6 +119,7 @@ exports.addConversation = async (req, res, next) => {
             await send_Notification_mail(senderInfo.email, receiverInfo.email, `Message Request from ${senderInfo.userName}`, `${senderInfo.userName} sent a message request please check the notification section.`, receiverInfo.userName)
             return res.status(200).send(`Message request sent to ${receiverInfo.userName}`)
         } else {
+            const receiverInfo = await User.findOne({ email: req.body.receiverId });
             const text = conversationExists[0].status == 'pending' ? `Already request sent. It is in ${conversationExists[0].status} status` : `Already conversation approved by ${receiverInfo.userName}`
             return res.status(200).send(text)
         }
