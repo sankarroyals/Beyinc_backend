@@ -161,8 +161,8 @@ exports.addReviewStars = async (req, res, next) => {
             }
             const user = await User.findOne({ email: req.body.review.email })
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'review': { ...req.body.review, 'reviewBy': user._id }} })
-            await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch. Check notification for more info.`, pitch.userInfo.userName)
-            await Notification.create({ senderInfo: user._id,  receiver: pitch.email, message: `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
+            await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${user.userName} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch. Check notification for more info.`, pitch.userInfo.userName)
+            await Notification.create({ senderInfo: user._id,  receiver: pitch.email, message: `${user.userName} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
             return res.status(200).json('Review added')
 
         }
