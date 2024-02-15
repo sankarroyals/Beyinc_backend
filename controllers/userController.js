@@ -730,6 +730,7 @@ exports.getAllUserProfileRequests = async (req, res, next) => {
 exports.addUserReviewStars = async (req, res, next) => {
   try {
     const user = await User.findOne({ _id: req.body.userId });
+    const reviewSentUser = await User.findOne({ email: req.body.review.email });
     if (user) {
       const userExists = await User.findOne({
         _id: req.body.userId,
@@ -740,6 +741,8 @@ exports.addUserReviewStars = async (req, res, next) => {
           { _id: req.body.userId, "review.email": req.body.review.email },
           { "review.$.review": req.body.review.review }
         );
+        await send_Notification_mail(user.email, user.email, `Added Stars to the pitch!`, `${reviewSentUser.userName} has added ${req.body.review.review} stars to your profile. Check notification for more info.`, pitch.userInfo.userName)
+        await Notification.create({ senderInfo: reviewSentUser._id, receiver: user.email, message: `${reviewSentUser.userName} has added ${req.body.review.review} stars to your profile.`, type: 'pitch', read: false })
         return res.status(200).json("Review updated");
       }
       const reviewUser = await User.findOne({ email: req.body.review.email });
@@ -747,6 +750,8 @@ exports.addUserReviewStars = async (req, res, next) => {
         { _id: req.body.userId },
         { $push: { review: req.body.review, reviewBy: reviewUser._id } }
       );
+      await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${user.userName} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch. Check notification for more info.`, pitch.userInfo.userName)
+      await Notification.create({ senderInfo: user._id, receiver: pitch.email, message: `${user.userName} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
       return res.status(200).json("Review added");
     }
     return res.status(400).json("No User Found");
