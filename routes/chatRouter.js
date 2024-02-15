@@ -22,6 +22,8 @@ router.route("/getFriendByConversationId").post(chatController.getFrienddetailsB
 router.route("/addMessage").post(chatController.addMessage);
 router.route("/deleteMessage").post(chatController.deleteMessage);
 router.route("/getMessages").post(chatController.getMessage);
+router.route("/getTotalMessages").post(chatController.getTotalMessageCount);
+
 
 
 

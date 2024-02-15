@@ -114,7 +114,7 @@ exports.addConversation = async (req, res, next) => {
                     email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role, user: senderInfo._id,
                 }, {
                     email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role, user: receiverInfo._id,
-                }], requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
+                    }], lastMessageTo: '', seen: '', requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
             })
             await send_Notification_mail(senderInfo.email, receiverInfo.email, `Message Request from ${senderInfo.email}`, `${senderInfo.email} sent a message request please check the notification section.`, receiverInfo.userName)
             return res.status(200).send(`Message request sent to ${req.body.receiverId}`)
@@ -146,8 +146,9 @@ exports.directConversationCreation = async (req, res, next) => {
                     email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role, user: senderInfo._id
                 }, {
                     email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role, user: receiverInfo._id
-                }], requestedTo: req.body.receiverId, status: req.body.status,
+                    }], seen: '', lastMessageTo: '', requestedTo: req.body.receiverId, status: req.body.status,
             })
+            await Notification.create({ senderInfo: senderInfo._id, receiver: receiverInfo.email, message: `${senderInfo.userName} has created a direct conversation with you.`, type: 'pitch', read: false })
             return res.status(200).send(`Conversation with ${req.body.receiverId} created`)
         } else {
             const text = conversationExists[0].status == 'pending' ? `Already request sent. It is in ${conversationExists[0].status} status` : `Already conversation with  ${conversationExists[0].requestedTo} is there`
@@ -260,9 +261,12 @@ exports.addMessage = async (req, res, next) => {
                 folder: `${email}/chat`
             })
             await Message.create({ email, file: { public_id: result.public_id, secure_url: result.secure_url }, conversationId, senderId, receiverId, message })
+            await Conversation.updateOne({ _id: conversationId }, { $set: { seen: '', lastMessageTo: receiverId, lastMessageText: message} })
             return res.status(200).send('New Message is added')
         }
         await Message.create({ email, file: '', conversationId, senderId, receiverId, message })
+        await Conversation.updateOne({ _id: conversationId }, { $set: { seen: '', lastMessageTo: receiverId, lastMessageText: message } })
+
         return res.status(200).send('New Message is added')
 
     }
@@ -279,9 +283,13 @@ exports.changeSeenStatus = async (req, res, next) => {
         // console.log(MessageExists);
         // console.log(MessageExists[0].seen);
         if (MessageExists[0] && MessageExists[0].seen==undefined) {
-            await Message.updateOne({ _id: MessageExists[0]._id }, { seen: new Date() })
+            await Message.updateOne({ _id: MessageExists[0]._id }, { $set: { seen: new Date() } })
+            await Conversation.updateOne({ _id: MessageExists[0].conversationId }, { $set:{seen: 'seen'} })
+
             return res.status(200).send('Message is seen')
         }
+        await Conversation.updateOne({ _id: MessageExists[0].conversationId }, { $set:{seen: 'seen'} })
+
         return res.status(200).send('Message Already seen')
 
 
@@ -317,6 +325,20 @@ exports.getMessage = async (req, res, next) => {
 }
 
 
+exports.getTotalMessageCount = async (req, res, next) => {
+    try {
+        const { receiverId, checkingUser } = req.body
+        const result = await Conversation.find({ 'members.user': { $in: [receiverId] }, status: 'approved', seen: '', lastMessageTo: checkingUser })
+        return res.status(200).send(result)
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(400).send(error)
+    }
+}
+
+
+
 
 
 
@@ -342,14 +364,14 @@ exports.chatBlock = async (req, res, next) => {
         const user = await User.findOne({ email: blockedBy })
         const conversation = await Conversation.findOne({ _id: conversationId, 'chatBlocked.blockedBy': blockedBy})
         if (conversation) {
-            await Conversation.updateOne({ _id: conversationId }, {'chatBlocked': {}})
+            await Conversation.updateOne({ _id: conversationId }, { $set: { 'chatBlocked': {} } })
             return res.status(200).send('Chat Unblocked')
         } 
-        await Conversation.updateOne({ _id: conversationId }, { 'chatBlocked': {userInfo: user._id, blockedBy: blockedBy} })
+        await Conversation.updateOne({ _id: conversationId }, { $set: { 'chatBlocked': { userInfo: user._id, blockedBy: blockedBy } } })
         return res.status(200).send('Chat blocked')
 
     } catch (err) {
-        return res.status(400).send(error)
+        return res.status(400).send(err)
     }
 }
 
