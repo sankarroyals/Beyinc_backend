@@ -169,19 +169,19 @@ exports.updateMessageRequest = async (req, res, next) => {
             _id: req.body.conversationId
         })
         if (conversationExists) {
-            const UserExist = await User.findOne({ email: conversationExists.members[1].email })
+            const receiverExist = await User.findOne({ email: conversationExists.members[1].email })
             const senderExist = await User.findOne({email: conversationExists.members[0].email})
             if (req.body.status == 'rejected') {
                 await Conversation.deleteOne({ _id: req.body.conversationId })
-                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${UserExist.userName}`, `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, senderExist.userName)
-                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${senderExist.userName}"`,UserExist.userName)
-                await Notification.create({ senderInfo: UserExist._id,  receiver: conversationExists.members[0].email, message: `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
+                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${receiverExist.userName}`, `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, senderExist.userName)
+                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${senderExist.userName}"`,receiverExist.userName)
+                await Notification.create({ senderInfo: receiverExist._id,  receiver: conversationExists.members[0].email, message: `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
                 return res.status(200).send(`Message ${req.body.status}`)
             }
             await Conversation.updateOne({ _id: req.body.conversationId }, { $set: { status: req.body.status } })
-            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${UserExist.userName}`, `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`,conversationExists.members[0].email)
-            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`)
-            await Notification.create({ senderInfo: UserExist._id,  receiver: conversationExists.members[0].email, message: `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
+            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${receiverExist.userName}`, `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, senderExist.userName)
+            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`, receiverExist.userName)
+            await Notification.create({ senderInfo: receiverExist._id,  receiver: conversationExists.members[0].email, message: `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
             return res.status(200).send(`Message ${req.body.status}`)
         }
         return res.status(400).send('Conversation not found')
