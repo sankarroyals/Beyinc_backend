@@ -170,10 +170,11 @@ exports.updateMessageRequest = async (req, res, next) => {
         })
         if (conversationExists) {
             const UserExist = await User.findOne({ email: conversationExists.members[1].email })
+            const senderExist = await User.findOne({email: conversationExists.members[0].email})
             if (req.body.status == 'rejected') {
                 await Conversation.deleteOne({ _id: req.body.conversationId })
-                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${UserExist.userName}`, `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, conversationExists.members[0].email)
-                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`)
+                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${UserExist.userName}`, `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, senderExist.userName)
+                await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`,UserExist.userName)
                 await Notification.create({ senderInfo: UserExist._id,  receiver: conversationExists.members[0].email, message: `${UserExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
                 return res.status(200).send(`Message ${req.body.status}`)
             }
