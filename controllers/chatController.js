@@ -151,6 +151,7 @@ exports.directConversationCreation = async (req, res, next) => {
             })
             if (req.body.status == 'pending') {
                 await send_Notification_mail(senderInfo.email, receiverInfo.email, `Message Request from ${senderInfo.userName}`, `${senderInfo.userName} sent a message request please check the notification section.`, receiverInfo.userName) 
+                return res.status(200).send(`Conversation with ${receiverInfo.userName} created`)
             }
             await Notification.create({ senderInfo: senderInfo._id, receiver: receiverInfo.email, message: `${senderInfo.userName} has created a direct conversation with you.`, type: 'pitch', read: false })
             return res.status(200).send(`Conversation with ${receiverInfo.userName} created`)
