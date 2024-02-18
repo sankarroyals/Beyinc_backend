@@ -23,7 +23,7 @@ exports.getProfile = async (req, res, next) => {
     const { email } = req.body;
     const userDoesExist = await User.findOne(
       { email: email },
-      { projection: { password: 0 } }
+      { password: 0, chatBlockedBy: 0 }
     )
 
     // console.log(removePass);

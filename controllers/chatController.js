@@ -131,6 +131,16 @@ exports.addConversation = async (req, res, next) => {
     }
 }
 
+exports.checkConversationBetweenTwo = async (req, res, next) => {
+    const conversationExists = await Conversation.find({
+        'members.user': { $all: [req.body.senderId, req.body.receiverId] }
+    })
+    if (conversationExists.length == 0) {
+        return res.status(400).json('No Converstaion')
+    }
+    return res.status(200).json('conversation exist')
+}
+
 // Admin can create direct conversation
 exports.directConversationCreation = async (req, res, next) => {
     try {
