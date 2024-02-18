@@ -184,7 +184,7 @@ exports.updateMessageRequest = async (req, res, next) => {
             }
             await Conversation.updateOne({ _id: req.body.conversationId }, { $set: { status: req.body.status } })
             await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${receiverExist.userName}`, `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, senderExist.userName)
-            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${conversationExists.members[0].email}"`, receiverExist.userName)
+            await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${senderExist.userName}"`, receiverExist.userName)
             await Notification.create({ senderInfo: receiverExist._id,  receiver: conversationExists.members[0].email, message: `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
             return res.status(200).send(`Message ${req.body.status}`)
         }
