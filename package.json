@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "nodemon server.js",
+    "build": "node build.js"
   },
   "dependencies": {
     "@hapi/joi": "^17.1.1",
