@@ -250,10 +250,10 @@ exports.verifyMainAccessToken = async (req, res, next) => {
 
 exports.mobile_otp = async (req, res, next) => {
   try {
-    const { phone } = req.body;
+    const { phone, type } = req.body;
     const phoneexist = await User.findOne({ phone: phone.slice(3) });
     console.log(phone.slice(3));
-    if (phoneexist) {
+    if (phoneexist && type !== 'forgot' && type !== 'login') {
       return res.status(400).json("Phone number already exists");
     }
     const otp = Math.floor(100000 + Math.random() * 900000);
