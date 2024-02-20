@@ -1,3 +1,4 @@
+const fetch = require("node-fetch");
 exports.allColleges = async (req, res, next) => {
   try {
     const result = await fetch("http://universities.hipolabs.com/search", {
