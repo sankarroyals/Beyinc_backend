@@ -188,7 +188,7 @@ exports.getReviewStars = async (req, res, next) => {
 
 exports.fetchAllPitch = async (req, res, next) => {
     try {
-        const AllPitches = await Pitch.find().populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role', 'state', 'town', 'country'] })
+        const AllPitches = await Pitch.find().populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role', 'state', 'town', 'country', 'verification'] })
         return res.status(200).json(AllPitches)
     } catch (err) {
         return res.status(400).json(err)
