@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
-
+const dotenv = require("dotenv");
+dotenv.config({ path: "../config.env" });
 const send_Notification_mail = async (from, to, subject, body,userName) => {
   try {
     const transporter = nodemailer.createTransport({

@@ -23,11 +23,8 @@ exports.getProfile = async (req, res, next) => {
     const { email } = req.body;
     const userDoesExist = await User.findOne(
       { email: email },
-      { projection: { password: 0 } }
-    ).populate({
-      path: "comments.commentBy",
-      select: ["email", "userName", "image", "role"],
-    });
+      { password: 0, chatBlockedBy: 0 }
+    )
 
     // console.log(removePass);
     if (userDoesExist) {
@@ -500,7 +497,7 @@ exports.updateVerification = async (req, res, next) => {
       await Notification.create({
         senderInfo: adminDetails._id,
         receiver: email,
-        message: `Your profile update request has been <b>${req.body.status}</b> by the admin.`,
+        message: `Your profile update request has been ${req.body.status} by the admin.`,
         type: "pitch",
         read: false,
       });
@@ -733,6 +730,7 @@ exports.getAllUserProfileRequests = async (req, res, next) => {
 exports.addUserReviewStars = async (req, res, next) => {
   try {
     const user = await User.findOne({ _id: req.body.userId });
+    const reviewSentUser = await User.findOne({ email: req.body.review.email });
     if (user) {
       const userExists = await User.findOne({
         _id: req.body.userId,
@@ -743,6 +741,8 @@ exports.addUserReviewStars = async (req, res, next) => {
           { _id: req.body.userId, "review.email": req.body.review.email },
           { "review.$.review": req.body.review.review }
         );
+        await send_Notification_mail(user.email, user.email, `Added Stars to the pitch!`, `${reviewSentUser.userName} has added ${req.body.review.review} stars to your profile. Check notification for more info.`, user.userName)
+        await Notification.create({ senderInfo: reviewSentUser._id, receiver: user.email, message: `${reviewSentUser.userName} has added ${req.body.review.review} stars to your profile.`, type: 'pitch', read: false })
         return res.status(200).json("Review updated");
       }
       const reviewUser = await User.findOne({ email: req.body.review.email });
@@ -750,6 +750,8 @@ exports.addUserReviewStars = async (req, res, next) => {
         { _id: req.body.userId },
         { $push: { review: req.body.review, reviewBy: reviewUser._id } }
       );
+      await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${user.userName} has added ${req.body.review.review} . Check notification for more info.`, user.userName)
+      await Notification.create({ senderInfo: user._id, receiver: pitch.email, message: `${user.userName} has added ${req.body.review.review} .`, type: 'pitch', read: false })
       return res.status(200).json("Review added");
     }
     return res.status(400).json("No User Found");
@@ -863,21 +865,3 @@ exports.addPayment = async (req, res, next) => {
   }
 };
 
-exports.likeComment = async (req, res, next) => {
-  try {
-    const commentOwner = await User.findById(req.body.comment_owner);
-    const comment = commentOwner.comments.filter(
-      (v) => v._id == req.body.comment_id
-    )[0];
-    if (comment.likes?.includes(req.payload.user_id)) {
-      comment.likes = comment.likes.filter((v) => v != req.payload.user_id);
-    } else {
-      comment.likes.push(req.payload.user_id);
-    }
-    commentOwner.save();
-    return res.status(200).json("comment liked");
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json(err);
-  }
-};

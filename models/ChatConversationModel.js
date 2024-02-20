@@ -28,6 +28,15 @@ const conversationSchema = new mongoose.Schema({
     pitchId: {
         type: String
     },
+    lastMessageText: {
+        type: String
+    },
+    lastMessageTo: {
+        type: String
+    },
+    seen: {
+        type: String
+    },
     chatBlocked: {
         userInfo: {
             type: mongoose.Schema.Types.ObjectId,

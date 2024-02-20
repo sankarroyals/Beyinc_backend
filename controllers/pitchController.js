@@ -14,7 +14,7 @@ exports.fetchPendingPitch = async (req, res, next) => {
 
 exports.fetchSinglePitch = async (req, res, next) => {
     try {
-        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'comments.commentBy', select: ['email', 'userName', 'image', 'role'] }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });
+        const pendingPitches = await Pitch.findOne({ _id: req.body.pitchId }).populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role'] });
         return res.status(200).json(pendingPitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -71,6 +71,22 @@ exports.addPitchComment = async (req, res, next) => {
         }
         return res.status(400).json('No Pitch Found')
     } catch (err) {
+        return res.status(400).json(err)
+    }
+}
+
+exports.addPitchSubComment = async (req, res, next) => {
+    try {
+        const pitch = await Pitch.findOne({ _id: req.body.pitchId, 'comments._id': req.body.commentId  })
+        if (pitch) {
+            const user = await User.findOne({ email: req.body.email })
+            await Pitch.updateOne({ _id: req.body.pitchId, 'comments._id': req.body.commentId }, { $push: { 'comments.$.subComments': { comment: req.body.comment, commentBy: user._id, createdAt: new Date() } } })
+            return res.status(200).json('Comment added')
+
+        }
+        return res.status(400).json('No Pitch Found')
+    } catch (err) {
+        console.log(err);
         return res.status(400).json(err)
     }
 }
@@ -145,8 +161,8 @@ exports.addReviewStars = async (req, res, next) => {
             }
             const user = await User.findOne({ email: req.body.review.email })
             await Pitch.updateOne({ _id: req.body.pitchId }, { $push: { 'review': { ...req.body.review, 'reviewBy': user._id }} })
-            await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch. Check notification for more info.`, pitch.userInfo.userName)
-            await Notification.create({ senderInfo: user._id,  receiver: pitch.email, message: `${req.body.review.email} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
+            await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${user.userName} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch. Check notification for more info.`, pitch.userInfo.userName)
+            await Notification.create({ senderInfo: user._id,  receiver: pitch.email, message: `${user.userName} has added ${req.body.review.review} stars to the ${pitch.title}(${pitch._id}) pitch.`, type: 'pitch', read: false })
             return res.status(200).json('Review added')
 
         }
@@ -172,7 +188,7 @@ exports.getReviewStars = async (req, res, next) => {
 
 exports.fetchAllPitch = async (req, res, next) => {
     try {
-        const AllPitches = await Pitch.find().populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role', 'state', 'town', 'country'] })
+        const AllPitches = await Pitch.find().populate({ path: 'userInfo', select: ['email', 'userName', 'image', 'role', 'state', 'town', 'country', 'verification'] })
         return res.status(200).json(AllPitches)
     } catch (err) {
         return res.status(400).json(err)
@@ -211,3 +227,6 @@ exports.recentPitchOfUser = async (req, res, next) => {
         return res.status(400).json(err)
     }
 }
+
+
+
