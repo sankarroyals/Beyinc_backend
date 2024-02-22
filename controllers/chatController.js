@@ -24,88 +24,11 @@ const Notification = require("../models/NotificationModel");
 
 exports.addConversation = async (req, res, next) => {
     try {
-        const { form, email, teamMembers, role, tags, pitchRequiredStatus } = req.body;
-        const { title, changeStatus, pitchId, pitch, banner, logo, financials } = form;
+        const { pitchId } = req.body;
         const conversationExists = await Conversation.find({
             'members.email': { $all: [req.body.senderId, req.body.receiverId] }
         })
         if (conversationExists.length == 0) {
-            // check pitch is there or not
-
-            let pitchDetails = ''
-            if (changeStatus == 'change') {
-                // const pitchTitleExists = await Pitch.findOne({ title: title })
-                // if (pitchTitleExists) {
-                //     return res.status(400).send('Pitch Title already exists')
-                // }
-                let pitchDoc = ''
-                if (pitch?.public_id == undefined) {
-                    pitchDoc = await cloudinary.uploader.upload(pitch, {
-                        folder: `${email}/pitch`
-                    })
-                } else {
-                    pitchDoc = pitch
-                }
-
-
-                // uploading Banner image
-                let bannerDoc = ''
-                if (banner?.public_id == undefined) {
-                    bannerDoc = await cloudinary.uploader.upload(banner, {
-                        folder: `${email}/pitch`
-                    })
-                } else {
-                    bannerDoc = banner
-                }
-
-
-                // uploading logo image
-                let logoDoc = ''
-                if (logo?.public_id == undefined) {
-                    logoDoc = await cloudinary.uploader.upload(logo, {
-                        folder: `${email}/pitch`
-                    })
-                } else {
-                    logoDoc = logo
-                }
-
-                // uploading financials image
-                let financialsDoc = ''
-                if (financials?.public_id == undefined) {
-                    financialsDoc = await cloudinary.uploader.upload(financials, {
-                        folder: `${email}/pitch`
-                    })
-                } else {
-                    financialsDoc = financials
-                }
-
-                const teams = []
-                for (let i = 0; i < teamMembers.length; i++) {
-                    let singMemberDoc = ''
-                    if (teamMembers[i]?.memberPic.public_id == undefined) {
-                        singMemberDoc = await cloudinary.uploader.upload(teamMembers[i]?.memberPic, {
-                            folder: `${email}/pitch`
-                        })
-                    } else {
-                        singMemberDoc = teamMembers[i]?.memberPic
-                    }
-
-                    teams.push({ memberPic: { secure_url: singMemberDoc?.secure_url, public_id: singMemberDoc?.public_id }, name: teamMembers[i]?.name, position: teamMembers[i]?.position, socialLink: teamMembers[i]?.socialLink, bio: teamMembers[i]?.bio })
-
-                }
-
-                // creating new pitch
-                if (form._id !== undefined) {
-                    delete form._id
-                }
-                const userExist = await User.findOne({ email: email })
-                const colleges = []
-                for (let i = 0; i < userExist.educationDetails.length; i++) {
-                    colleges.push(userExist.educationDetails[i].college)
-                }
-                pitchDetails = await Pitch.create({ ...form, userInfo: userExist._id, comments: [], review: [],  teamMembers: [...teams],  pitchRequiredStatus: pitchRequiredStatus, email: email,  tags: tags, title: title, status: 'pending', pitch: { secure_url: pitchDoc?.secure_url, public_id: pitchDoc?.public_id }, banner: { secure_url: bannerDoc?.secure_url, public_id: bannerDoc?.public_id }, logo: { secure_url: logoDoc?.secure_url, public_id: logoDoc?.public_id }, financials: { secure_url: financialsDoc?.secure_url, public_id: financialsDoc?.public_id } })
-            }
-
             const senderInfo = await User.findOne({ email: req.body.senderId });
             const receiverInfo = await User.findOne({ email: req.body.receiverId });
             // adding conversation after pitch done
@@ -114,8 +37,9 @@ exports.addConversation = async (req, res, next) => {
                     email: senderInfo.email, profile_pic: senderInfo.image?.url, userName: senderInfo.userName, role: senderInfo.role, user: senderInfo._id,
                 }, {
                     email: receiverInfo.email, profile_pic: receiverInfo.image?.url, userName: receiverInfo.userName, role: receiverInfo.role, user: receiverInfo._id,
-                    }], lastMessageTo: '', seen: '', requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchDetails == '' ? pitchId : pitchDetails._id
+                    }], lastMessageTo: '', seen: '', requestedTo: req.body.receiverId, status: 'pending', pitchId: pitchId
             })
+
             await send_Notification_mail(senderInfo.email, receiverInfo.email, `Message Request from ${senderInfo.userName}`, `${senderInfo.userName} sent a message request please check the notification section.`, receiverInfo.userName)
             return res.status(200).send(`Message request sent to ${receiverInfo.userName}`)
         } else {
@@ -191,6 +115,12 @@ exports.updateMessageRequest = async (req, res, next) => {
                 await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[1].email, `Message Update`, `You have ${req.body.status} the message request sent by ${senderExist.userName}"`,receiverExist.userName)
                 await Notification.create({ senderInfo: receiverExist._id,  receiver: conversationExists.members[0].email, message: `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, type: 'pitch', read: false })
                 return res.status(200).send(`Message ${req.body.status}`)
+            }
+            // After approve pitch will associate with this conversation
+            const selectedPitch = await Pitch.findOne({ _id: conversationExists.pitchId })
+            if (selectedPitch) {
+                selectedPitch.associatedTo.push(receiverExist._id)
+                selectedPitch.save()
             }
             await Conversation.updateOne({ _id: req.body.conversationId }, { $set: { status: req.body.status } })
             await send_Notification_mail(conversationExists.members[1].email, conversationExists.members[0].email, `Message Update from ${receiverExist.userName}`, `${receiverExist.userName} has ${req.body.status} your message request and added reason: "${req.body.rejectReason}"`, senderExist.userName)

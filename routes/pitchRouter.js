@@ -5,8 +5,14 @@ const router = express.Router();
 router.route("/pendingPitch").post(pitchController.fetchPendingPitch);
 router.route("/livePitch").get(pitchController.fetchLivePitch);
 router.route("/allPitches").get(pitchController.fetchAllPitch);
-router.route("/userPitches").post(pitchController.fetchUserPitches);
+router.route("/userPitches").get(pitchController.fetchUserPitches);
 router.route("/updatePitch").post(pitchController.updateSinglePitch);
+router.route("/createPitch").post(pitchController.createPitch);
+router.route("/deletePitch").post(pitchController.deletePitch);
+router.route("/userLivePitch").get(pitchController.userLivePitch);
+
+
+
 // router.route("/addPitchComment").post(pitchController.addPitchComment);
 // router.route("/addPitchSubComment").post(pitchController.addPitchSubComment);
 
