@@ -3,6 +3,7 @@ const authRouter = require("./routes/authRouter");
 const userRouter = require("./routes/userRouter");
 const userCommentRouter = require("./routes/userCommentsRouter");
 const helperRouter = require("./routes/helperRouter");
+const dashboardRouter = require("./routes/dashboardRouter");
 
 const chatRouter = require("./routes/chatRouter");
 const pitchRouter = require("./routes/pitchRouter");
@@ -35,6 +36,8 @@ app.use("/api/helper", helperRouter);
 app.use("/api/userDetails", verifyAccessToken, userCommentRouter);
 
 app.use("/api/chat", verifyAccessToken, chatRouter);
+
+app.use("/api/dashboard", verifyAccessToken, dashboardRouter);
 
 app.use("/api/userDetails", verifyAccessToken, userRouter);
 
