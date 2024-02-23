@@ -13,7 +13,8 @@ const NotificationSchema = new mongoose.Schema({
     // },
     // senderProfile: { type: String },
     receiver: {
-        type: String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     },
     message: {
         type: String
