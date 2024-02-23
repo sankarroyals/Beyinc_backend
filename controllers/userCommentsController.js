@@ -35,8 +35,8 @@ exports.getUserComment = async (req, res, next) => {
         const { userId } = req.body
         const comments = await UserComment.find({ userId: userId }).populate({
             path: "commentBy",
-            select: ["email", "userName", "image", "role"],
-        }).populate({ path: 'likes', select: ["email", "userName", "image", "role"] }).populate({ path: 'Dislikes', select: ["email", "userName", "image", "role"] });
+            select: ["userName", "image", "role"],
+        }).populate({ path: 'likes', select: ["userName", "image", "role"] }).populate({ path: 'Dislikes', select: ["userName", "image", "role"] });
         return res.status(200).json(comments);
     } catch (err) {
         return res.status(400).json(err);

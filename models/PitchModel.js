@@ -99,6 +99,10 @@ const pitchSchema = new mongoose.Schema({
     status: {
         type: String
     },
+    associatedTo: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     pitch: {
         public_id: {
             type: String

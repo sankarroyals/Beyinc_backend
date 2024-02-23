@@ -1,14 +1,8 @@
+const fetch = require("node-fetch");
 exports.allColleges = async (req, res, next) => {
   try {
-    console.log(
-      "http://universities.hipolabs.com/search" +
-        (req.query.name ? new URLSearchParams({ name: req.query.name }) : "")
-    );
     const result = await fetch(
-      "http://universities.hipolabs.com/search" +
-        (req.query.name
-          ? "?" + new URLSearchParams({ name: req.query.name })
-          : ""),
+      `http://universities.hipolabs.com/search?name=${req.body.name}`,
       {
         method: "GET",
       }

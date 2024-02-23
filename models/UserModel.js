@@ -147,9 +147,6 @@ const userSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
         },
-        email: {
-          type: String,
-        },
         review: {
           type: Number,
         },
@@ -166,9 +163,6 @@ const userSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
         },
-        email: {
-          type: String,
-        },
         createdAt: {
           type: Date,
         },
@@ -179,9 +173,6 @@ const userSchema = new mongoose.Schema(
         userInfo: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
-        },
-        email: {
-          type: String,
         },
         createdAt: {
           type: Date,

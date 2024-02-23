@@ -34,7 +34,7 @@ const send_Notification_mail = async (from, to, subject, body,userName) => {
     // Send email
     transporter.sendMail(mailOptions, async (error, info) => {
       if (error) {
-        console.log("Internal Server Error");
+        console.log(error, "Internal Server Error");
       } else {
         console.log("Email sent successfully");
       }

@@ -20,9 +20,9 @@ const send_Notification_mail = require("../helpers/EmailSending");
 
 exports.getProfile = async (req, res, next) => {
   try {
-    const { email } = req.body;
+    const { id } = req.body;
     const userDoesExist = await User.findOne(
-      { email: email },
+      { _id: id },
       { password: 0, chatBlockedBy: 0 }
     )
 
@@ -37,17 +37,14 @@ exports.getProfile = async (req, res, next) => {
 
 exports.getApprovalRequestProfile = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const userDoesExist = await UserUpdate.findOne({ email: email });
-    const image = await User.findOne({ email: email });
+    const { userId } = req.body;
+    const userDoesExist = await UserUpdate.findOne({ _id: userId }, { password: 0 }).populate({
+      path: "userInfo",
+      select: ["userName", "image", "role", "email"],
+    });;
 
     if (userDoesExist) {
-      const removePass = {
-        ...userDoesExist._doc,
-        password: "",
-        image: { ...image._doc.image },
-      };
-      return res.status(200).json(removePass);
+      return res.status(200).json(userDoesExist);
     } else {
       return res.status(400).json("No User Found for request");
     }
@@ -59,6 +56,7 @@ exports.getApprovalRequestProfile = async (req, res, next) => {
 exports.editProfile = async (req, res, next) => {
   try {
     const {
+      userId,
       email,
       userName,
       role,
@@ -446,15 +444,17 @@ exports.editProfile = async (req, res, next) => {
 
     return res.send({ accessToken: accessToken, refreshToken: refreshToken });
   } catch (err) {
+    console.log(err)
     return res.status(400).send({ message: err });
   }
 };
 
 exports.updateVerification = async (req, res, next) => {
   try {
-    const { email, status } = req.body;
+    const { userId, status } = req.body;
     // Checking user already exist or not
-    const userDoesExist = await UserUpdate.findOne({ email: email });
+    const userDoesExist = await UserUpdate.findOne({ _id: userId });
+    const email = userDoesExist.email
     if (!userDoesExist) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -496,7 +496,7 @@ exports.updateVerification = async (req, res, next) => {
       );
       await Notification.create({
         senderInfo: adminDetails._id,
-        receiver: email,
+        receiver: userDoesExist.userInfo,
         message: `Your profile update request has been ${req.body.status} by the admin.`,
         type: "pitch",
         read: false,
@@ -515,8 +515,8 @@ exports.updateVerification = async (req, res, next) => {
       );
       await Notification.create({
         senderInfo: adminDetails._id,
-        receiver: email,
-        message: `Your profile update request has been <b>${req.body.status}</b> by the admin and added comment: "${req.body.reason}"`,
+        receiver: userDoesExist.userInfo,
+        message: `Your profile update request has been ${req.body.status} by the admin and added comment: "${req.body.reason}"`,
         type: "pitch",
         read: false,
       });
@@ -588,8 +588,8 @@ exports.verifyUserPassword = async (req, res, next) => {
 
 exports.updateProfileImage = async (req, res, next) => {
   try {
-    const { email, image } = req.body;
-    const userDoesExist = await User.findOne({ email: email });
+    const { image, userId, email } = req.body;
+    const userDoesExist = await User.findOne({ _id: userId });
     if (!userDoesExist) {
       return res.status(400).send("User not found");
     }
@@ -609,7 +609,7 @@ exports.updateProfileImage = async (req, res, next) => {
       folder: `${email}`,
     });
     await User.updateOne(
-      { email: email },
+      { _id: userId },
       {
         $set: {
           image: {
@@ -646,8 +646,8 @@ exports.updateProfileImage = async (req, res, next) => {
 
 exports.deleteProfileImage = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const userDoesExist = await User.findOne({ email: email });
+    const { userId } = req.body;
+    const userDoesExist = await User.findOne({ _id: userId });
     if (!userDoesExist) {
       return res.status(400).send("User not found");
     }
@@ -664,7 +664,7 @@ exports.deleteProfileImage = async (req, res, next) => {
       );
     }
     await User.updateOne(
-      { email: email },
+      { _id: userId },
       {
         $set: {
           image: "",
@@ -719,7 +719,7 @@ exports.getAllUserProfileRequests = async (req, res, next) => {
     const { filters } = req.body;
     const result = await UserUpdate.find().populate({
       path: "userInfo",
-      select: ["email", "userName", "image", "role"],
+      select: ["userName", "image", "role"],
     });
     return res.status(200).json(result);
   } catch (err) {
@@ -730,32 +730,33 @@ exports.getAllUserProfileRequests = async (req, res, next) => {
 exports.addUserReviewStars = async (req, res, next) => {
   try {
     const user = await User.findOne({ _id: req.body.userId });
-    const reviewSentUser = await User.findOne({ email: req.body.review.email });
+    const reviewSentUser = await User.findOne({ _id: req.body.review.reviewBy });
     if (user) {
       const userExists = await User.findOne({
         _id: req.body.userId,
-        "review.email": req.body.review.email,
+        "review.reviewBy": req.body.review.reviewBy,
       });
       if (userExists) {
         await User.updateOne(
-          { _id: req.body.userId, "review.email": req.body.review.email },
+          { _id: req.body.userId, "review.reviewBy": req.body.review.reviewBy, },
           { "review.$.review": req.body.review.review }
         );
         await send_Notification_mail(user.email, user.email, `Added Stars to the pitch!`, `${reviewSentUser.userName} has added ${req.body.review.review} stars to your profile. Check notification for more info.`, user.userName)
-        await Notification.create({ senderInfo: reviewSentUser._id, receiver: user.email, message: `${reviewSentUser.userName} has added ${req.body.review.review} stars to your profile.`, type: 'pitch', read: false })
+        await Notification.create({ senderInfo: reviewSentUser._id, receiver: user._id, message: `${reviewSentUser.userName} has added ${req.body.review.review} stars to your profile.`, type: 'pitch', read: false })
         return res.status(200).json("Review updated");
       }
-      const reviewUser = await User.findOne({ email: req.body.review.email });
+      const reviewUser = await User.findOne({ _id: req.body.review.reviewBy });
       await User.updateOne(
         { _id: req.body.userId },
         { $push: { review: req.body.review, reviewBy: reviewUser._id } }
       );
-      await send_Notification_mail(pitch.email, pitch.email, `Added Stars to the pitch!`, `${user.userName} has added ${req.body.review.review} . Check notification for more info.`, user.userName)
-      await Notification.create({ senderInfo: user._id, receiver: pitch.email, message: `${user.userName} has added ${req.body.review.review} .`, type: 'pitch', read: false })
+      await send_Notification_mail(user.email, user.email, `Added Stars to the pitch!`, `${user.userName} has added ${req.body.review.review} . Check notification for more info.`, user.userName)
+      await Notification.create({ senderInfo: user._id, receiver: user._id, message: `${user.userName} has added ${req.body.review.review} .`, type: 'pitch', read: false })
       return res.status(200).json("Review added");
     }
     return res.status(400).json("No User Found");
   } catch (err) {
+    console.log(err);
     return res.status(400).json(err);
   }
 };
@@ -763,11 +764,11 @@ exports.addUserReviewStars = async (req, res, next) => {
 exports.getUserReviewStars = async (req, res, next) => {
   try {
     const user = await User.findOne(
-      { email: req.body.userEmail, "review.email": req.body.email },
+      { _id: req.body.userId, "review.reviewBy": req.body.reviewBy },
       { "review.$": 1 }
     ).populate({
       path: "review.reviewBy",
-      select: ["email", "userName", "image", "role"],
+      select: ["userName", "image", "role"],
     });
 
     if (user) {
