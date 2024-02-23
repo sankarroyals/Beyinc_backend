@@ -2,6 +2,7 @@ const send_Notification_mail = require("../helpers/EmailSending")
 const Notification = require("../models/NotificationModel")
 const Pitch = require("../models/PitchModel")
 const User = require("../models/UserModel")
+const cloudinary = require("../helpers/UploadImage");
 
 exports.createPitch = async (req, res, next) => {
     try {
