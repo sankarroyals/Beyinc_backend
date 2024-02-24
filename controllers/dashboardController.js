@@ -12,10 +12,11 @@ exports.dashboradDetails = async (req, res, next) => {
       const pitch = pitches[i];
       pitchDetail[pitch.status] += 1;
     }
-    const convoDetail = {};
+    const convoDetail = { Mentor: 0, Admin: 0, Entrepreneur: 0, Investor: 0 };
     const conversations = await Conversation.find({
       members: { $in: [req.payload.user_id] },
     }).populate({ path: "members", select: ["role", "_id"] });
+    const memberIds = new Set();
     for (let i = 0; i < conversations.length; i++) {
       const convo = conversations[i];
       const otherMembers = convo.members.filter(
@@ -23,6 +24,8 @@ exports.dashboradDetails = async (req, res, next) => {
       );
       for (let j = 0; j < otherMembers.length; j++) {
         const member = otherMembers[j];
+        if (memberIds.has(member._id)) continue;
+        memberIds.add(member._id);
         convoDetail[member.role] = convoDetail[member.role]
           ? convoDetail[member.role] + 1
           : 1;
